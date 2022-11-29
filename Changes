@@ -1,0 +1,284 @@
+// This file is part of ariadne.
+//
+// ariadne is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+// PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+R"(
+
+1.1.1
+=====
+- Added -n option (don't generate entities)
+- Fix signal generation when the left hand side of an xrf has array or record
+  indexing
+
+1.1.2
+=====
+- Fix check on instance names in configurations
+- Convert all instance names to lower case before using them
+
+1.1.3
+=====
+- New rules for handling inout
+  1 inout -> make port
+  >1 inout -> connect
+  mixing inout with in or out -> error
+
+1.1.4
+=====
+- Add declarationstop for declarations that should go at the top of the
+  generated file
+
+1.1.5
+=====
+- Fix assign generic when have 2 instances of an entity where 1 of them is
+  assigned and the other not
+
+1.1.6
+=====
+- Component can be declared in a package
+- Support for different naming rules. $ARIADNE_NAMING_RULES can be set to
+  coreuse or easics or left empty which defaults to easics.
+
+1.1.7
+=====
+- rename_ports
+
+1.1.9
+=====
+- keep_case
+
+1.2.0
+=====
+- SystemC support
+
+1.2.1
+=====
+- Added post_exec command
+  Added sc2v program (convert systemc to vhdl entity)
+- Fix comment parsing in C++ headers
+
+1.3.0
+=====
+- Ruby support
+
+1.3.1
+=====
+- bring out internal signal to output port
+
+1.3.3
+=====
+- Make manpage
+- fix case conversion for instance name in rename_ports
+
+1.3.4
+=====
+- fix pointer bug
+
+1.3.5
+=====
+- add verilog output
+- add port comments, fix multiline group comments, fix comment inherit from
+  submodule
+- add entity and architecture comment
+
+1.3.6
+=====
+- Preprocessor support
+- sc_thread
+
+1.3.7
+=====
+- VHDL ports without direction default to 'in'
+- Add -I option (include dir for 'from' files)
+
+1.3.8
+=====
+- Fix absolute paths in from statement
+
+1.3.9
+=====
+- -D option to define macros
+
+1.3.10
+======
+- Add easics generated file header in output
+
+1.3.11
+======
+- Preserve port order within port groups
+
+1.4.0
+=====
+- Add verilog reader
+- When determining a signal type, prefer constrained array types over
+  unconstratined types
+- Semicolon after info section is optional
+- Fix file header
+
+1.4.1
+=====
+- Handle RUBYOPT
+- -f option to force writing files, even if they haven't changed (make friendly)
+
+1.4.2
+=====
+- prefixXrf script added
+- vciBusPrefix script added
+
+1.4.3
+=====
+- add removeUserXrf method for ruby scripts
+- add forceType method for rubyScripts
+- from statement can be split over 2 lines
+- better error message when forgetting ; after from
+
+1.4.4
+=====
+- Auto search for entities (using vma) when from statement is missing
+- Auto-regenerate entities based on file header (-r option)
+
+1.4.5
+=====
+- config_in_arch support : write configuration inside architecture iso in
+  configuration file.
+- prefixXrf knowns a bit about type conversions
+- add -C option to print changelog
+
+1.4.6
+=====
+- support wreal in verilog reader
+- verilog reader extract port only from matching module
+
+1.4.7
+=====
+- Fix for double port map for a port that has xrf and rename_ports
+
+1.4.8
+=====
+- Add inst_comment : add comment to a instantiation
+- 1.4.7 broke 'intermediate signal' port maps
+
+1.4.9
+=====
+- Add python support : just like ruby but then python
+- Better verilog input and output
+- Better generic substitution in types when using assign
+- Generics order is preserved
+- Constants order is preserved (issue 534)
+- Fix for top and instance having same generic but are not connected (issue 528)
+- Constants in types are also replaced with their value (like generics)
+  (issue 535)
+- Add () around values of replaced generics/constants
+- Use .port() for 'open' connections in verilog
+
+1.4.10
+======
+- Propagate port and port group comments in verilog
+- Support declarations and declarationstop in verilog
+- Don't remove parentheses in types
+- Support for add_header in verilog
+
+1.4.11
+======
+- Fix auto-generated signal assign in verilog
+- Support many parentheses in right side of xrf
+  e.g. xrf a : i_0/data((3*(2+g_size))+1 downto 0);
+- Support unsigned and signed vhdl types for verilog output
+
+1.4.12
+======
+- Added support for file headers (-H option or file_header statement in info)
+- Better handling of verilog macros
+- Add a optional match section to rename_ports to only rename ports whose name
+  matches with a regular expression.
+- Ability to use the direction of a port in rename_ports
+- getSubInstance(name) function for scripting
+
+1.4.13
+======
+- Support for connecting TLM fifos in SystemC
+- Add remove_header for SystemC
+- Improve keep_case
+- Sort port groups based on occurence in input files, not alphabetically.
+
+1.4.14
+======
+- Better support for keep_case
+- Fix exec with a newline
+- Check port names before running all ariadne rules
+- Better error message when port not found
+- Bus prefix script for AXI4Lite
+- Keep environment variables in generated file header for included files
+
+1.4.15
+======
+- prefixXrf does not add an xrf if there already is an xrf for that port
+
+1.4.16
+======
+- Fix verilog output with group comments
+- -p option to query why a package ended up on toplevel
+
+1.4.17
+======
+- Fix verilog parsing of multiple ports on 1 line
+
+1.4.18
+======
+- Updated preprocessor version: relative include paths now supported w.r.t. file
+  in which they are included
+- Fix filling in value for generic of record type
+
+1.4.19
+======
+- 2D array in vhdl parser
+
+1.4.20
+======
+- Supporting generic without default value in ari file
+- Generic in multiple submodules allowed
+
+1.4.21
+======
+- Added getUserXrfs and getUserAssigns
+- Allowing more verilog syntax
+
+1.4.22
+======
+- Allowing automatic syntax
+
+1.4.23
+======
+- Added verilog support for implicit localparams
+- Added verilog support for parameter with type in module
+
+1.4.24
+======
+- Fix verilog parsing for module port declaration list: multiple ports on 1 line
+- Allowing verilog syntax port names in ariadne file
+
+1.4.26
+======
+- Fix CaseAwareString issues with scripting
+- Fix for submodule with same generic name, where only 1 is assigned
+
+1.4.27
+======
+- Convert verilog default values for paramaters to vhdl
+  16'h12 -> x"0012"
+- Don't remove double space inside strings (e.g. in default values for string)
+
+1.4.28
+======
+- Removed other naming rules. Only easics naming rules are suported at the
+  moment
+)"

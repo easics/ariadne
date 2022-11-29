@@ -1,0 +1,514 @@
+// This file is part of ariadne.
+//
+// ariadne is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+// PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+ariadne(1)
+==========
+Steven Coenen <steven@easics.be>
+
+NAME
+----
+ariadne - Create structural VHDL
+
+SYNOPSYS
+--------
+ariadne [-h] [-v] [-n] [-g] [-G] [-c] [-I <dir>] [-f] [-r] [-H <header file>] <config file>
+
+DESCRIPTION
+-----------
+ariadne create structural VHDL files.  It reads a config file and VHDL entity
+files to create a VHDL entity/architecture/configuration that contains instances
+of other VHDL entities.
+
+Convention is to use the +.ari+ extension for ariadne config files.
+
+The first thing ariadne does is change to the directory the config file is in.
+Then it starts processing the config file.  This means that all files used by
+the config file should have either absolute paths or a path relative to the
+ariadne config file and not relative to the place where ariadne is invoked.
+
+Operation
+---------
+Ariadne connects VHDL entities using a few default rules based on port/generic
+names and directions.  This default behaviour can be overwritten in the config
+file.
+
+When reading VHDL, it also extract port comments and group-of-ports comments.
+Port comments are comment lines directly in front of a port that start with --//
+Multiple port-comment lines are concatenated.  A blank line can be used to stop
+concatenation.  Concatenation also stops at the previous port definition.
+Group-of-ports comments are comment lines in front of a port that start with --/
+Multiple group-comment lines are concatenated.  A blank line can be used to stop
+concatenation.  The group-comment for a port is the last group-comment before
+the port definition.  This means there can be other port declarations in
+between.
+
+Default behaviour for ports
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+All ports on all entities with the same portname are put in a group.  For each
+group a decision is made based upon the contents of the group.
+
+* More than 1 output port in the group -> error
+* Mixing inout with in or out -> error
+* Only input ports in the group -> create an input port on the toplevel and
+  connect it to all the ports in the group
+* 1 output port and at least 1 input port in the group -> create a signal and
+  connect all ports to the signal
+* 1 output -> create an output port on the toplevel and connect it to the output
+  port in the group
+* 1 inout -> create an inout port on the toplevel and connect it to the inout
+  port in the group
+* > 1 inout -> create a signal and connect all the ports to the signal
+
+Default behaviour for generics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generics are treated as input ports.  All generics with the same generic name
+are put in a group.  Each group is then processed as a group of input ports.
+
+Note
+^^^^
+When a manually connected/specified signal/port/generic/constant has the same
+name as an automatically generated signal/port/generic, it is also connected.
+
+e.g. entity A has a port called +myport+, entity B has a port called
++yourport+, in the config file you specified +xrf  yourport : A_1/myport+
+then the +yourport+ signal is connected to the +yourport+ port on entity B.
+
+Syntax of an ariadne file
+-------------------------
+An ariadne config file consist of 1 hierarchy section followed by several info
+sections.
+
+* ''hierarchy section''
+* ''info sections''
+
+C-style preprocessor statements can be used :
+
+* #include "file"
+* #define, #undef
+* #if, #ifdef, #ifndef
+
+Included ariadne file extension suggestions : .ariinc
+
+Hierarchy section
+~~~~~~~~~~~~~~~~~
+
+----
+hierarchy <entity name>
+{
+  <module list>
+};
+----
+
+Where +<module list>+ is a list of
+----
+  <instance name> : <entity name>;
+----
+
+For each +<entity name>+ and for the toplevel hierarchy, there should be an info
+section.
+
+Info section
+~~~~~~~~~~~~
+----
+info <entity name>
+{
+  <info lines>
+};
+----
+
+Toplevel
+^^^^^^^^
+For the toplevel entity (the one from 'hierarchy'), following statements can be
+used :
+
+  * port <name> : <direction> <type>; +
+    Add a port to the entity +
+    The +<direction>+ can be "auto". Ariadne will try to figure out the port
+    direction by looking at the submodule ports that are attached to it (taking
+    xrf into account).  If they are all inputs, the direction is in.  If there
+    is one output, the direction is out.  An intermediate signal is created and
+    assigned to the output port when there is one output and one or more
+    inputs. +
+    The type can also be "auto".   The type will be derived (taken from) from
+    a signal or port that is connected to the port.
+  * port <name>; +
+    This is the same as +port <name> : auto auto;+
+  * xrf <name> : <subinstance name>/<sub name>
+    [, <subinstance name>/<sub_name>, ... ]; +
+    Connect port(s)/generic(s) on submodule(s) to +<name>+.  For a port,
+    +<name>+ can refer to a port on the toplevel or to a signal.  For a
+    generic, +<name>+ can refer to a generic on the toplevel or to a
+    constant. +
+    If the type of a port or signal is a composed type (array or record), you
+    can connect only a part of that port or signal. e.g. +
+    xrf my_array(0) : sub_1/pin_0; +
+    xrf my_record.a : sub_1/pin_a; +
+    xrf my_bit : sub_1/pins(0), sub_2/pin_1.a; +
+    When a submodule input is connected to an output port, an intermediate
+    signal is created and assigned to the port.
+  * xrfp <name> : <subinstance name>/<sub name>
+    [, <subinstance name>/sub_name>, ... ]; +
+    Same as an xrf with the same arguments + a +port <name>;+ statement.
+  * generic <name> : <type> [ := <value> ]; +
+    Add a generic to the toplevel entity
+  * signal <name> : <type> [ := <value> ]; +
+    Add a signal to the toplevel architecture. +
+    +<type>+ can be "auto", just like with +port+
+  * signal <name>; +
+    Same as +signal <name> : auto;+
+  * constant <name> : <type> := <value>; +
+    Add a constant to the toplevel architecture
+  * configuration <name> : + comma separated list of subconfig_spec; +
+    Where subconfig_spec is +
+    <subinstance name>/<configuration name> || <subinstance name>.<architecture
+    name> +
+    Specify configuration bindings.  Multiple configurations are allowed. +
+    If +<configuration name>+ is called +blackbox+, the configuration
+    specification for +<subinstance name>+ will be omitted from the
+    configuration.
+  * statements <any vhdl statements> end statements; +
+    Insert literal VHDL statements in the architecture (after the +begin+
+    statement)
+  * declarations <any vhdl declarations> end declarations; +
+    Insert literal VHDL declarations in the archtitecture (before the +begin+
+    statement, after all component/signal/constant declarations)
+  * declarationstop <any vhdl declarations> end declarationstop; +
+    Insert literal VHDL declarations in the archtitecture (before the +begin+
+    statement, before all component/signal/constant declarations)
+  * remove_package : <package specification>; +
+    Remove specified packages from the entity.  +<package specification>+ should
+    be the exact string that comes after the +use+ statement.  e.g. if the
+    VHDL says +use ieee.numeric_std.all;+ you should write
+    +remove_package : ieee.numeric_std.all;+ in the ariadne file.
+    The same goes for all the other +package+ statements
+  * add_package : <package specification>; +
+    Add a package to the entity. The library statement will be added if needed.
+  * move_package : <package specification>; +
+    Move a package from the entity to the architecture.  Also works for adding
+    packages to the architecture.
+  * assign <value> : <subinstance name>/<sub name>
+    [, <subinstance name>/<sub name>, ... ]; +
+    Assign a constant value to a generic or a port.  When assigning a generic,
+    all types that depend on the generic are modified to use the new constant
+    value.
+  * rename_ports <instancename> [/match/] : <from> = <to>; +
+    Replace all occurences of <from> with <to> in all port names of
+    +<instancename>+.  This is done before connection rules are executed.
+    +<from>+ and +<to>+ are regular expression. std::regex is used
+    with the std::regex_constants::format_sed option +
+    Before +<from>+ or +<to>+ are used, $dir is replaced with the direction of
+    the port (in, out or inout) and $d is replaced with the short version of the
+    direction (i, o or io).  The reverse direction is obtained via $notdir and
+    $nd.  The reverse of inout is also inout. +
+    If a match regexp is supplied (bewteen / like in sed,awk), only ports whose
+    name (partially) matches with the match are considered for port renames. +
+    e.g. +rename_ports x_0 /^p/ : $ = _asic;+ adds the _asic suffix to all ports
+    that start with a p. +
+    If an +xrf+ exists for a port, no renaming is done for that port.
+  * group_comment <portname> : <group_comment>; +
+    Adds a group comment to this port. +<portname>+ can be a shell wildcard
+    pattern. (see glob(7))
+  * port_comment <portname> : <port_comment>; +
+    Adds a port comment to this port. +<portname>+ can be a shell wildcard
+    pattern.
+  * entity_comment : <comment>; +
+    Add comments to put in front of the entity declaration.  The VHDL comment
+    token is added for each line.
+  * arch_comment : <comment>; +
+    Add comments to put in front of the architecture declaration.  The VHDL
+    comment token is added for each line.
+  * inst_comment <instancename> : <comment>; +
+    Add comments to put in front of the instantiation.  The VHDL comment token
+    is added for each line.
+  * keep_case; +
+    Tries to preserve the case in component names and port names. (For
+    interaction with case-sensitive verilog)
+  * post_exec : <program [ <arguments> ]; +
+    Execute program after the files for this module have been generated.
+  * file_header : <filename>; +
+    File to use as file header for generated files of this module
+
+Note
+^^^^
+ariadne only writes to a file if it has changed.  This can be changed with the
+-f option or by setting the ARIADNE_FORCE_WRITE environment variable.
+
+Reading of generated entities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+When an entity was generated by an Easics tool (and has the 'Easics generated
+file' header, and the entity does not have an exec statement, ariadne can
+reinvoke that tool to regenerate the entity.  This can be enabled with the -r
+option or by setting the ARIADNE_REGENERATE environment variable.  The -r option
+also adds ARIADNE_REGENERATE to the environment, so subsequent ariadne
+invocations, either through 'exec' or by the command in the generated file
+header, will also regenerate entities.
+
+Submodules
+^^^^^^^^^^
+Info sections for other entities (entities read from a file).
+This is the list of available statements :
+
+  * architecture : <name>; +
+    Use this architecture name
+  * library : <name>; +
+    Submodule is located in the library
+  * from : <file with entity>; +
+    Read the submodule entity from this file
+    If it is omitted, ariadne will use vma to find a file containing the entity.
+    The library is taken into account, if specified.  If only 1 file is found,
+    it is used as source for the entity.
+  * exec : <program> [ <arguments> ]; +
+    Execute program.  Note that the statements in an info section are processed
+    in the same order as they appear in the ariadne file.  So if the +exec+
+    statements generates the entity specified in the +from+ statement, you
+    should put the +exec+ statement before the +from+ statement.
+  * component : <package specification>; +
+    Component declaration is found in this package.  This means the toplevel
+    architecture will not contain a component declaration for this entity, but a
+    use clause will be added for this package.
+  * config_in_arch; +
+    Write the configuration for this entity in th earchitectureiso of the
+    configuration file.
+
+SystemC support
+---------------
+Since version 1.2.0, ariadne also supports SystemC.  These are the modifications
+for SystemC :
+
+  * from : <file> +
+    if the file ends with .h, the SystemC parser is used to extract ports
+  * language : systemc +
+    This sets the language of the generated file to systemc
+  * declarations section is pasted into the private section of the class
+  * statements section is pasted into the constructor (at the end)
+  * add_header : header_file +
+    Adds header_file at the top of the .h file.  It must include the "" or <>
+  * move_header : header_file +
+    Adds (or moves to) header_file to the top of the .C file.
+  * create instance_name <any C++ code> end create +
+    Use <any C++ code> to construct the given instance_name.  If this is not
+    given, a simple +new+ is used.
+  * sc_method method_name (sensitivity list) <any C++ code> end sc_method +
+    Make a new C++ method, create an SC_METHOD for it and sensitize it to all
+    the signals/ports in the sensitivity list.  The sensitivity list is a comma
+    seperated list of names. It can be empty.
+  * sc_thread method_name (sensitivity list) <any C++ code> end sc_thread +
+    Same as sc_method, but creates a SC_THREAD
+
+Verilog support
+---------------
+
+Verilog output.  Only std_logic and std_logic_vector types are supported.
+
+  * language : verilog +
+    This sets the language of the generated file to verilog.
+    The input modules must all be vhdl entities which only have std_logic and
+    std_logic_vector ports.  The ranges of the std_logic_vector ports must be
+    literal integers using downto, and the lower bound must be 0.
+
+Verilog input. (from version 1.4.0)
+
+  * from : <file> +
+    if the file ends with .v, the verilog parser is used to extract ports
+    VHDL equivalent type for verilog ports is std_logic and std_logic_vector.
+    Only simple port width deduction is done, no expressions are parsed.  The
+    text of the port range declaration is just copied.
+
+Other output related keywords supported by the verilog output :
+
+  * add_header : before module, syntax like in SystemC
+  * declarationstop : before wire declarations
+  * declarations : after wire declarations
+  * statements : after instantiations
+
+Ruby plugins
+------------
+Since version 1.3.0, ariadne files can contain ruby scripts.
+
+Ruby code is inserted between +ruby+ and +end ruby+ statements, or +ruby_post+
+and +end ruby+ statements.  All code in between is executed as a ruby script.
+Multiple ruby blocks are allowed.  They are executed in the order they appear in
+the file.  All script-level variables are shared between all the blocks. You can
++require+ other ruby files inside the ruby code.
+
+Python plugins
+--------------
+Since version 1.4.9, ariadne files can contain python scripts.
+
+Python code is inserted between +python+ and +end python+ statements, or
++python_post+ and +end python+ statements.  All code in between is executed as a
+python script.  Multiple python blocks are allowed.  They are executed in the
+order they appear in the file.  All script-level variables are shared between
+all the blocks. You can +import+ other python files inside the python code.
+
+The python has the same API as the Ruby plugins.  The API is located in the
++ariadne+ module, so that should be imported first.  The execution time of the
+scripts is also the same as for Ruby.
+
+The variables exported from C++ are shared between ruby and python.  +$module+
+can be modified in Ruby and then the modifications can be read in python.
+
+Ruby API
+~~~~~~~~
+In ruby, the current module is available as the global variable +$module+.  It's
+type is ModuleInstance and has following methods :
+
+  * getSubInstances +
+    returns a list of child instances (of type ModuleInstance)
+  * getSubInstance(name:string) +
+    Get a single subinstance by name
+  * getInstanceName +
+    return the instance name (string)
+  * getPorts +
+    returns a list of ports of the module.  Note that $module does not have
+    ports yet because ruby code is executed before making ports on the toplevel.
+    Child instances do have ports.
+  * getSignals +
+    return a list of signals in the module
+  * getEntityName +
+    return the entity name of the module as a string
+  * addPort(name:string, direction:string, type:string, groupComment:string) +
+    add a port to the module
+  * addSignal(name:string, type:string) +
+    add a signal to the module
+  * addConstant(name:string, type:string, value:string) +
+    add a constant to the module
+  * addGeneric(name:string, type:string, value:string) +
+    add a generic to the module
+  * addStatements(statements:string) +
+    add VHDL statements to the module
+  * addDeclarations(declarations:string) +
+    add VHDL declarations to the module
+  * addDeclarationsTop(declarations:string) +
+    add VHDL declarations to the module, to be placed in the beginning of the
+    VHDL file
+  * addUserXrf(lhsName:string, child:string, rhsName:string) +
+    add a crossreference to the module.
+  * removeUserXrf(instance:string, rhsName:string) +
+    remove the effect of an xrf statement written in the .ari file or add with
+    addUserXrf
+  * addUserAssign(lhsName:string, child:string, rhsName:string) +
+    add an assign to the module (to assign generic)
+  * addRenamePorts(child:string, from:string, to:string) +
+    Rename a port on child
+  * addGroupComment(port:string, comment:string) +
+    Add group comment to a port
+  * addPortComment(port:string, comment:string) +
+    Add port specific comment
+  * addEntityComment(comment:string) +
+    Add comment to entity
+  * addArchComment(comment:string) +
+    Add comment to architecture
+  * removePackage(library:string, package:string) +
+    Remove a use declaration from the entity
+  * addPackage(library:string, package:string) +
+    Add a use declaration to the entity
+  * movePackage(library:string, package:string) +
+    First do removePackage(), then add the use declaration to the architecture
+  * addComponentPackage(library:string, package:string) +
+    Add given package to the architecture context and don't write out component
+    declarations.
+  * getXrfs(instance:string, portsNotGenerics:bool) +
+    Get a list of all xrf statements for given instance. Only return xrfs for
+    ports or generics, depending on portsNotGenerics. +
+    Return value is a list of RubyXrf
+  * getUserXrfs(instance:string) +
+    Get a list of all user defined xrf statements for given instance.
+    Return value is a list of RubyXrf
+  * getUserAssigns(instance:string) +
+    Get a list of all user defined assign statements for given instance.
+    Return value is a list of RubyXrf
+  * haveUserXrf(instance:string, port:string) +
+    Check if there is a xrf statement for given instance and port
+
+The class SignalPort (returned by getPorts and getSignals) has following methods
+:
+
+  * getName +
+    Return the name of the signal or port as a string
+  * getType +
+    Return the VHDL type of the signal or port as a string
+  * forcePort +
+    force the signal or port to become a port
+  * forceSignal +
+    force the signal or port to become a signal
+  * forceType +
+    force the type of a signal or port
+  * forceDirection(direction:string) +
+    force the direction of a port. Argument is "in", "out" or "inout"
+  * setType(type:string) +
+    Set the VHDL type of the signal or port
+  * getDirection +
+    Get the direction of a port. Returns a string
+  * getWidthMin1 +
+    Get the width of a port minus 1. Returns a string.  Only works for
+    std_logic, std_logic_vector, unsigned and signed types.
+  * isPort +
+    Return true if it is a port, false if it is a signal
+  * renameType(oldname:string, newname:string) +
+    Rename an identifier in the type name. e.g. to replace the name of a generic
+    with it's value. Only complete words are replaced.
+  * setGroupComment(comment:string)
+  * getGroupComment +
+    Return the group comment for a port as a string
+  * setPortComment(comment:string)
+  * getPortComment +
+    Return the port comment for a port as a string
+
+The class RubyXrf has following attributes:
+
+  * signalName : string
+  * childPortName : string
+
+All the ruby code between +ruby+ and +end ruby+ is executed before the automatic
+ariadne rules are applied.
+
+All the ruby code between +ruby_post+ and +end ruby+ is executed after the
+automatic ariadne rules are applied, before files are generated.
+
+Ruby scripts installed with ariadne
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+There are a number of usefull scripts that come with ariadne.  The path these
+scripts are in, is in the ruby inc path, so you can just 'require' them
+
+  * UpdateGitIgnore +
+    Automatically create/update a .gitignore file. The files generated by
+    ariadne are appended to the file, if they are not yet in there.  All you
+    have to do is "require ''UpdateGitIgnore''"
+
+  * prefixXrf +
+    Connects ports between submodule A and submodule B which only differ in a
+
+  * vciBusPrefix +
+    Adds a prefix to the vci ports (by default the vc entity name),
+    and a group name.
+    This is usefull in combination with the generated vci bus connect.
+    See $VCI_HOME/contrib/vciBusConnect.rb
+
+Generation of File Headers
+--------------------------
+
+Ariadne can generate custom file headers.  This can be done using the -H command
+line option or with a file_header statement in the info section. With the
+command line option, ariadne generates headers in all generated files, based on
+the header template specified with the -H option.  When specified in the info
+section, headers are only generated for that specific design unit.
+
+Ariadne fills in following placeholders in the template:
+
+* %fname%: the filename
+* %module%: the module name
+* %designunit%: 'VHDL entity', 'VHDL architecture', 'VHDL configuration',
+'SystemC header file', 'SystemC implementation' or 'Verilog module'
+* %comment:<n>%: a comment line of length <n> 

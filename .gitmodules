@@ -1,0 +1,6 @@
+[submodule "external/rubyexport"]
+	path = external/rubyexport
+	url = git@github.com:easics/rubyexport.git
+[submodule "external/preprocessor"]
+	path = external/preprocessor
+	url = git@github.com:easics/preprocessor.git
