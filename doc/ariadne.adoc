@@ -14,7 +14,7 @@
 
 ariadne(1)
 ==========
-Steven Coenen <steven@easics.be>
+Contact info: <tools@easics.be>
 
 NAME
 ----
