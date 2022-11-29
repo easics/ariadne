@@ -19,6 +19,13 @@ Creates structural RTL hierarchy levels
 **Warning**
 We do not support Ruby version 2.7.x
 
+**Warning**
+We use Git submodules so don't forget to run the following command before
+compiling
+```bash
+git submodule update --init
+```
+
 ## Compilation
 
 Compilation is done with [CMAKE](https://cmake.org/)
