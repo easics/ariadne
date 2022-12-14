@@ -58,3 +58,13 @@ the following option:
 ```bash
 cmake --build build -j 4
 ```
+
+## Packages
+
+For Ubuntu and Debian the following packages are required:
+* cmake
+* For Ninja builds: build-essential
+* python3-dev
+* ruby-dev
+* flex
+* bison

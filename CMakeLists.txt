@@ -21,26 +21,27 @@ option(SCRIPT_PYTHON "Support Python scripts" OFF)
 
 if(SCRIPT_RUBY)
   add_compile_definitions(SCRIPT_RUBY)
+
+  # Ruby dependencies
+  find_package(Ruby REQUIRED)
+
+  if (RUBY_VERSION_MAJOR VERSION_EQUAL "2" AND
+      RUBY_VERSION_MINOR VERSION_EQUAL "7")
+    message(FATAL_ERROR "Ruby version 2.7.x is not supported")
+  endif()
 endif()
 
 if(SCRIPT_PYTHON)
   add_compile_definitions(SCRIPT_PYTHON)
+
+  # Python dependencies
+  find_package(Python REQUIRED COMPONENTS Interpreter Development)
 endif()
 
 if (NOT (SCRIPT_RUBY OR SCRIPT_PYTHON))
   message(FATAL_ERROR "No script support option supplied. Supply either "
                       "SCRIPT_RUBY, SCRIPT_PYTHON or both")
 endif()
-
-## Package dependencies
-find_package(Ruby REQUIRED)
-
-if (RUBY_VERSION_MAJOR VERSION_EQUAL "2" AND
-    RUBY_VERSION_MINOR VERSION_EQUAL "7")
-  message(FATAL_ERROR "Ruby version 2.7.x is not supported")
-endif()
-
-find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
 ## Sources
 add_subdirectory(external/preprocessor)

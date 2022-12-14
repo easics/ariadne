@@ -15,15 +15,38 @@
 ## Target libraries
 add_executable(ariadne)
 
+## Include direcories
 target_include_directories(ariadne
   PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}
 )
 
-target_link_libraries(ariadne PreProcess rubyexport ${RUBY_LIBRARY}
-                      ${Python_LIBRARY} ${CMAKE_DL_LIBS})
+if (SCRIPT_RUBY)
+  target_include_directories(ariadne
+    PRIVATE
+      ${RUBY_INCLUDE_DIRS}
+  )
+endif()
 
-## Package dependencies
+if (SCRIPT_PYTHON)
+  target_include_directories(ariadne
+    PRIVATE
+      ${Python_INCLUDE_DIRS}
+  )
+endif()
+
+## Linking dependencies
+target_link_libraries(ariadne PreProcess)
+
+if (SCRIPT_RUBY)
+  target_link_libraries(ariadne rubyexport ${RUBY_LIBRARY} ${CMAKE_DL_LIBS})
+endif()
+
+if (SCRIPT_PYTHON)
+  target_link_libraries(ariadne rubyexport ${Python_LIBRARY} ${CMAKE_DL_LIBS})
+endif()
+
+## Package dependencies for parsers
 find_package(BISON)
 find_package(FLEX)
 
@@ -58,14 +81,6 @@ FLEX_TARGET(verilogScanner
 ADD_FLEX_BISON_DEPENDENCY(verilogScanner verilogParser)
 
 target_link_libraries(ariadne ${FLEX_LIBRARIES})
-
-## Package dependencies
-target_include_directories(ariadne
-  PRIVATE
-    ${RUBY_INCLUDE_DIRS}
-    ${RUBY_INCLUDE_DIR}/ruby
-    ${Python_INCLUDE_DIRS}
-)
 
 ## File list
 target_sources(ariadne
