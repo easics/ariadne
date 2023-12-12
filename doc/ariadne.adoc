@@ -296,14 +296,14 @@ for SystemC :
     Adds header_file at the top of the .h file.  It must include the "" or <>
   * move_header : header_file +
     Adds (or moves to) header_file to the top of the .C file.
-  * create instance_name <any C++ code> end create +
-    Use <any C++ code> to construct the given instance_name.  If this is not
+  * create instance_name <any {cpp} code> end create +
+    Use <any {cpp} code> to construct the given instance_name.  If this is not
     given, a simple +new+ is used.
-  * sc_method method_name (sensitivity list) <any C++ code> end sc_method +
-    Make a new C++ method, create an SC_METHOD for it and sensitize it to all
+  * sc_method method_name (sensitivity list) <any {cpp} code> end sc_method +
+    Make a new {cpp} method, create an SC_METHOD for it and sensitize it to all
     the signals/ports in the sensitivity list.  The sensitivity list is a comma
     seperated list of names. It can be empty.
-  * sc_thread method_name (sensitivity list) <any C++ code> end sc_thread +
+  * sc_thread method_name (sensitivity list) <any {cpp} code> end sc_thread +
     Same as sc_method, but creates a SC_THREAD
 
 Verilog support
@@ -356,7 +356,7 @@ The python has the same API as the Ruby plugins.  The API is located in the
 +ariadne+ module, so that should be imported first.  The execution time of the
 scripts is also the same as for Ruby.
 
-The variables exported from C++ are shared between ruby and python.  +$module+
+The variables exported from {cpp} are shared between ruby and python.  +$module+
 can be modified in Ruby and then the modifications can be read in python.
 
 Ruby API
