@@ -1,0 +1,56 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+-- EASICS generated file
+-- command : ariadne test.ari
+-- tool_version : 1.4.13
+-- input : test.ari
+-- input : a_ent.vhd
+
+-- How
+-- are
+-- you
+-- today
+architecture rtl of test is
+
+  component a
+    port (
+          --/ Multiline
+          --/ Group
+          --/ comment
+          clk : in std_logic;
+          --/ Another comment
+          reset : in std_logic;
+          --/ more groups
+          --// port comment for pin_1
+          pin_1 : in std_logic;
+          --// port comment for pin_2
+          --// which is spread over multiple lines
+          pin_2 : in std_logic;
+          --/ group comment not overwritten in ari file
+          pin_3 : in std_logic
+         );
+  end component;
+
+
+begin
+  a_0 : a
+    port map (
+      clk => clk,
+      pin_1 => pin_1,
+      pin_2 => pin_2,
+      pin_3 => pin_3,
+      reset => reset);
+
+end rtl;

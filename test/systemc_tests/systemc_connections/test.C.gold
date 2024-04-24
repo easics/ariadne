@@ -1,0 +1,49 @@
+// This file is part of ariadne.
+//
+// ariadne is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+// PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+// EASICS generated file
+// command : ariadne test.ari
+// input : test.ari
+// input : a.h
+// input : b.h
+
+#include "test.h"
+#include "a.h"
+#include "b.h"
+
+test::test(sc_core::sc_module_name name)
+  : sc_core::sc_module(name),
+    clk1("clk1"),
+    data1("data1"),
+    internal_data2("internal_data2")
+{
+  a_0 = new a("a_0");
+  a_0->clk1(clk1);
+  a_0->data1(data1);
+  a_0->data2(internal_data2);
+  b_0 = new b("b_0");
+  b_0->clk1(clk1);
+  b_0->data1(data1);
+
+}
+
+test::~test()
+{
+  delete a_0;
+  a_0 = 0;
+  delete b_0;
+  b_0 = 0;
+}
+
+SC_MODULE_EXPORT(test);

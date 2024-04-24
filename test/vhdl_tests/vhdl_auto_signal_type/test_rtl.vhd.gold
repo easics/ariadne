@@ -1,0 +1,59 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+-- EASICS generated file
+-- command : ariadne test.ari
+-- input : test.ari
+-- input : a_ent.vhd
+-- input : b_ent.vhd
+
+architecture rtl of test is
+
+  signal clk : std_logic;
+  signal pin_0 : std_logic_vector ( 3 downto 0 );
+  signal reset : std_logic;
+  component a
+    port (
+          clk : in std_logic;
+          reset : in std_logic;
+          pin_0 : in std_logic_vector ( 3 downto 0 );
+          pin_1 : in std_logic_vector ( 4 downto 1 )
+         );
+  end component;
+
+  component b
+    port (
+          clk : out std_logic;
+          reset : out std_logic;
+          pin_0 : out std_logic_vector ( 3 downto 0 );
+          pin_1 : in std_logic_vector ( 4 downto 1 )
+         );
+  end component;
+
+
+begin
+  a_1 : a
+    port map (
+      clk => clk,
+      pin_0 => pin_0,
+      pin_1 => pin_1,
+      reset => reset);
+  b_1 : b
+    port map (
+      clk => clk,
+      pin_0 => pin_0,
+      pin_1 => pin_1,
+      reset => reset);
+
+end rtl;

@@ -1,0 +1,51 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+-- EASICS generated file
+-- command : ariadne test.ari
+-- tool_version : 1.4.13
+-- input : test.ari
+-- input : a_ent.vhd
+-- input : b_ent.vhd
+
+architecture rtl of test is
+
+  signal p_uppER2_i : boolean;
+  component A
+    port (
+          p_UPpercase : out std_logic;
+          p_UPPER2 : out boolean
+         );
+  end component;
+
+  component b
+    port (
+          p_Uppercase : out std_logic;
+          p_UPper2 : in boolean
+         );
+  end component;
+
+
+begin
+  i_A_0 : A
+    port map (
+      p_UPpercase => p2_UPper,
+      p_UPPER2 => p_uppER2_i);
+  i_B_0 : b
+    port map (
+      p_Uppercase => p_Uppercase,
+      p_UPper2 => p_uppER2_i);
+  p_uppER2 <= p_uppER2_i;
+
+end rtl;

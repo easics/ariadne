@@ -28,6 +28,7 @@
 #include <utility>
 #include <vector>
 #include <list>
+#include <regex>
 
 class SignalPort;
 class ConstGeneric;
@@ -93,14 +94,23 @@ public:
   struct PortRename
     {
       PortRename(const CaseAwareString & match,
-                 const CaseAwareString & first,
-                 const CaseAwareString & second,
-                 SourceLoc loc) : match(match), first(first), second(second),
-                                  loc(loc) {}
-      CaseAwareString match; // only change ports matching this regexp
-      CaseAwareString first; // original name
-      CaseAwareString second; // new name
+                 const CaseAwareString & original,
+                 const CaseAwareString & replacement,
+                 SourceLoc loc);
+      bool matchAll; // true if original match was empty
+      std::regex match; // only change ports matching this regexp
+      std::map<std::string, std::regex> originals; // precompiled reges original
+                                                   // name for each direction
+      CaseAwareString replacement; // new name
       SourceLoc loc;
+
+      // Replace $dir, $d, $notdir and $nd in s with the corresponding direction
+      // direction $dir   $d  $notdir $nd
+      // in         in     i    out    o
+      // out        out    o     in    i
+      // inout      inout  io   inout  io
+      static CaseAwareString applyDirection(CaseAwareString const & s,
+                                            CaseAwareString const & direction);
     };
   typedef std::map<CaseAwareString, cvector<PortRename> > PortRenameMap;
 

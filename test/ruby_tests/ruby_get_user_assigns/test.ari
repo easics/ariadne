@@ -1,0 +1,50 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+hierarchy test
+{
+  a_0 : a;
+};
+
+info test
+{
+  assign 15 : a_0/g_b;
+
+  ruby_post
+    # get assigns
+    userAssigns = $module.getUserAssigns("a_0")
+
+    # check only 1 assign
+    if (userAssigns.size != 1)
+      raise "Invalid number of user assigns: #{userAssigns.size}, expected 1."
+    end
+
+    userAssign = userAssigns[0]
+
+    # check assign name
+   if (!userAssign.signalName.eql?("15"))
+     raise "Invalid user assign name: #{userAssign.signalName}, expected 15."
+   end
+
+    # check assign value
+   if (!userAssign.childPortName.eql?("g_b"))
+     raise "Invalid user assign name: #{userAssign.childPortName}, expected g_b."
+   end
+  end ruby;
+};
+
+info a
+{
+  from : a_ent.vhd;
+};

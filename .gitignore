@@ -15,9 +15,12 @@
 *.sw[k-p]
 /.config
 /Config
+.nfs*
 
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 
 build/
+
+objects_systemc-*

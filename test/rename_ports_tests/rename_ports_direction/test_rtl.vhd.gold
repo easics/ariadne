@@ -1,0 +1,50 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+-- EASICS generated file
+-- command : ariadne test.ari
+-- tool_version : 1.4.31
+-- input : test.ari
+-- input : a_ent.vhd
+
+architecture rtl of test is
+
+  component A
+    port (
+
+          port_from_matching_short_i : in std_logic;
+          port_from_opposite_short_o : in std_logic;
+          port_from_matching_long_in : in std_logic;
+          port_from_opposite_long_out : in std_logic;
+          port_to_matching_short : in std_logic;
+          port_to_opposite_short : in std_logic;
+          port_to_matching_long : in std_logic;
+          port_to_opposite_long : in std_logic
+         );
+  end component;
+
+
+begin
+  i_A_0 : A
+    port map (
+      port_from_matching_long_in => port_from_matching_long,
+      port_from_matching_short_i => port_from_matching_short,
+      port_from_opposite_long_out => port_from_opposite_long,
+      port_from_opposite_short_o => port_from_opposite_short,
+      port_to_matching_long => port_to_matching_long_in,
+      port_to_matching_short => port_to_matching_short_i,
+      port_to_opposite_long => port_to_opposite_long_out,
+      port_to_opposite_short => port_to_opposite_short_o);
+
+end rtl;

@@ -941,3 +941,53 @@ void Module::changeUserXrf(const CaseAwareString & originalName,
     }
 }
 
+Module::PortRename::PortRename(const CaseAwareString & match,
+                               const CaseAwareString & original,
+                               const CaseAwareString & replacement,
+                               SourceLoc loc)
+  : matchAll(match.empty())
+  , match(StringUtil::strip(StringUtil::strip(match, "/")).str())
+  , replacement(replacement)
+  , loc(loc)
+{
+  std::vector<std::string> dirs = { "in", "out", "inout" };
+  for (auto direction : dirs)
+    {
+      auto what = applyDirection(original, CaseAwareString(false, direction));
+      originals[direction].assign(what.strCase());
+    }
+}
+
+CaseAwareString Module::PortRename::applyDirection(CaseAwareString const & s,
+                                                   CaseAwareString const & direction)
+{
+  CaseAwareString what = s;
+  CaseAwareString shortDirection = direction.substr(0, 1);
+  if (direction == "inout")
+    shortDirection = CaseAwareString(direction.caseSensitive(), "io");
+
+  StringUtil::replace("$dir", direction, what);
+  StringUtil::replace("$d", shortDirection, what);
+  CaseAwareString reverseDirection;
+  CaseAwareString reverseDirectionShort;
+  if (direction == "in")
+    {
+      reverseDirection = CaseAwareString(direction.caseSensitive(), "out");
+      reverseDirectionShort =CaseAwareString(direction.caseSensitive(),"o");
+    }
+  else if (direction == "out")
+    {
+      reverseDirection = CaseAwareString(direction.caseSensitive(), "in");
+      reverseDirectionShort =CaseAwareString(direction.caseSensitive(), "i");
+    }
+  else
+    {
+      reverseDirection = CaseAwareString(direction.caseSensitive(),"inout");
+      reverseDirectionShort = CaseAwareString(direction.caseSensitive(), "io");
+    }
+
+  StringUtil::replace("$notdir", reverseDirection, what);
+  StringUtil::replace("$nd", reverseDirectionShort, what);
+
+  return what;
+}

@@ -1,0 +1,57 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+hierarchy test
+{
+  a_0 : a;
+  b_0 : b;
+  a_1 : a;
+  b_1 : b;
+  a_2 : a;
+  b_2 : b;
+  a_3 : a;
+  b_3 : b;
+};
+
+info test
+{
+  assign 4 : a_0/g_dwidth;
+  assign 6 : b_0/g_dwidth;
+  assign 4 : a_2/g_dwidth;
+  assign 6 : b_2/g_dwidth;
+  ruby
+    require_relative '../../../ruby/prefixXrf.rb'
+    prefixXrf('a_0', 'prea_', 'b_0', 'preb_', 'a0_to_b0_')
+    prefixXrf('b_2', 'preb_', 'a_2', 'prea_', 'a2_to_b0_')
+  end ruby;
+
+  assign 6 : a_1/g_dwidth;
+  assign 4 : b_1/g_dwidth;
+  assign 6 : a_3/g_dwidth;
+  assign 4 : b_3/g_dwidth;
+  ruby
+    prefixXrf('a_1', 'prea_', 'b_1', 'preb_', 'a1_to_b1_')
+    prefixXrf('b_3', 'preb_', 'a_3', 'prea_', 'a3_to_b3_')
+  end ruby;
+};
+
+info a
+{
+  from : a_ent.vhd;
+};
+
+info b
+{
+  from : b_ent.vhd;
+};

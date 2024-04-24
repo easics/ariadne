@@ -1,0 +1,99 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+-- EASICS generated file
+-- command : ariadne test.ari
+-- tool_version : 1.4.29
+-- input : test.ari
+-- input : a_ent.vhd
+-- input : b_ent.vhd
+
+architecture rtl of test is
+
+  signal a0_to_b0_d : std_logic_vector((6) - 1 downto 0);
+  signal a0_to_b0_unsigned_d : unsigned((4) - 1 downto 0);
+  signal a1_to_b1_d : std_logic_vector((4) - 1 downto 0);
+  signal a1_to_b1_unsigned_d : unsigned((6) - 1 downto 0);
+  signal a2_to_b0_d : std_logic_vector((6) - 1 downto 0);
+  signal a2_to_b0_unsigned_d : unsigned((4) - 1 downto 0);
+  signal a3_to_b3_d : std_logic_vector((4) - 1 downto 0);
+  signal a3_to_b3_unsigned_d : unsigned((6) - 1 downto 0);
+  component a
+    generic (
+          g_dwidth : integer
+         );
+    port (
+
+          prea_d : out unsigned ( g_dwidth - 1 downto 0 )
+         );
+  end component;
+
+  component b
+    generic (
+          g_dwidth : integer
+         );
+    port (
+
+          preb_d : in std_logic_vector ( g_dwidth - 1 downto 0 )
+         );
+  end component;
+
+
+begin
+  a_0 : a
+    generic map (
+      g_dwidth => 4)
+    port map (
+      prea_d => a0_to_b0_unsigned_d);
+  b_0 : b
+    generic map (
+      g_dwidth => 6)
+    port map (
+      preb_d => a0_to_b0_d);
+  a_1 : a
+    generic map (
+      g_dwidth => 6)
+    port map (
+      prea_d => a1_to_b1_unsigned_d);
+  b_1 : b
+    generic map (
+      g_dwidth => 4)
+    port map (
+      preb_d => a1_to_b1_d);
+  a_2 : a
+    generic map (
+      g_dwidth => 4)
+    port map (
+      prea_d => a2_to_b0_unsigned_d);
+  b_2 : b
+    generic map (
+      g_dwidth => 6)
+    port map (
+      preb_d => a2_to_b0_d);
+  a_3 : a
+    generic map (
+      g_dwidth => 6)
+    port map (
+      prea_d => a3_to_b3_unsigned_d);
+  b_3 : b
+    generic map (
+      g_dwidth => 4)
+    port map (
+      preb_d => a3_to_b3_d);
+  a0_to_b0_d <= "00" & std_logic_vector(a0_to_b0_unsigned_d);
+  a2_to_b0_d <= "00" & std_logic_vector(a2_to_b0_unsigned_d);
+  a1_to_b1_d <= std_logic_vector(a1_to_b1_unsigned_d(3 downto 0));
+  a3_to_b3_d <= std_logic_vector(a3_to_b3_unsigned_d(3 downto 0));
+
+end rtl;

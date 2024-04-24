@@ -88,7 +88,8 @@ std::string Context::getText() const
        library!=context_.end(); ++library)
     {
       if (!library->second.empty())
-        text += "library " + library->first.str() + ";\n";
+        if (library->first.str() != "work")
+          text += "library " + library->first.str() + ";\n";
       for (auto package : library->second)
         {
           if (!package.packageName.empty())

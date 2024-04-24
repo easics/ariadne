@@ -1,0 +1,45 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+-- EASICS generated file
+-- command : ariadne test.ari
+-- tool_version : 1.4.17
+-- input : test.ari
+-- input : a_ent.vhd
+
+architecture rtl of test is
+
+  constant c_record_type :   t_record_type  :=   (first => 2,
+                                             second => 4);
+  signal first : std_logic_vector(((2))  - 1 downto 0);
+  component a
+    generic (
+          g_a : t_record_type
+         );
+    port (
+          first : in std_logic_vector ( g_a . first - 1 downto 0 );
+          second : out std_logic_vector ( g_a . second - 1 downto 0 )
+         );
+  end component;
+
+
+begin
+  a_0 : a
+    generic map (
+      g_a => c_record_type)
+    port map (
+      first => first,
+      second => second);
+
+end rtl;

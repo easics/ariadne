@@ -1,0 +1,41 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+hierarchy test
+{
+  a_1 : a;
+  b_1 : b;
+};
+
+info test
+{
+  port clk   : out std_logic;
+  port reset : out std_logic;
+  port pin   : out std_logic;
+
+  signal clk_i : boolean;
+  signal clk_i_0 : boolean;
+
+  xrfp pint : a_1/pin, b_1/pin;
+};
+
+info a
+{
+  from : a_ent.vhd;
+};
+
+info b
+{
+  from : b_ent.vhd;
+};

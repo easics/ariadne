@@ -14,7 +14,6 @@
 
 ariadne(1)
 ==========
-Contact info: <tools@easics.be>
 
 NAME
 ----
@@ -132,7 +131,7 @@ Toplevel
 For the toplevel entity (the one from 'hierarchy'), following statements can be
 used :
 
-  * port <name> : <direction> <type>; +
+  * port [ [group comment] ] <name> : <direction> <type>; +
     Add a port to the entity +
     The +<direction>+ can be "auto". Ariadne will try to figure out the port
     direction by looking at the submodule ports that are attached to it (taking
@@ -140,9 +139,11 @@ used :
     is one output, the direction is out.  An intermediate signal is created and
     assigned to the output port when there is one output and one or more
     inputs. +
-    The type can also be "auto".   The type will be derived (taken from) from
-    a signal or port that is connected to the port.
-  * port <name>; +
+    The type can also be "auto".  The type will be derived (taken from) from
+    a signal or port that is connected to the port. +
+    Optionally, group comments can be added to the port. e.g. +
+    +port [System] clk : in std_logic;+
+  * port [ [group comment] ] <name>; +
     This is the same as +port <name> : auto auto;+
   * xrf <name> : <subinstance name>/<sub name>
     [, <subinstance name>/<sub_name>, ... ]; +
@@ -157,9 +158,10 @@ used :
     xrf my_bit : sub_1/pins(0), sub_2/pin_1.a; +
     When a submodule input is connected to an output port, an intermediate
     signal is created and assigned to the port.
-  * xrfp <name> : <subinstance name>/<sub name>
+  * xrfp [ [group comment] ] <name> : <subinstance name>/<sub name>
     [, <subinstance name>/sub_name>, ... ]; +
-    Same as an xrf with the same arguments + a +port <name>;+ statement.
+    Same as an xrf with the same arguments + a
+    +port [ [group comment] ] <name>;+ statement.
   * generic <name> : <type> [ := <value> ]; +
     Add a generic to the toplevel entity
   * signal <name> : <type> [ := <value> ]; +
@@ -296,14 +298,14 @@ for SystemC :
     Adds header_file at the top of the .h file.  It must include the "" or <>
   * move_header : header_file +
     Adds (or moves to) header_file to the top of the .C file.
-  * create instance_name <any {cpp} code> end create +
-    Use <any {cpp} code> to construct the given instance_name.  If this is not
+  * create instance_name <any C\++ code> end create +
+    Use <any C++ code> to construct the given instance_name.  If this is not
     given, a simple +new+ is used.
-  * sc_method method_name (sensitivity list) <any {cpp} code> end sc_method +
-    Make a new {cpp} method, create an SC_METHOD for it and sensitize it to all
+  * sc_method method_name (sensitivity list) <any C\++ code> end sc_method +
+    Make a new C++ method, create an SC_METHOD for it and sensitize it to all
     the signals/ports in the sensitivity list.  The sensitivity list is a comma
     seperated list of names. It can be empty.
-  * sc_thread method_name (sensitivity list) <any {cpp} code> end sc_thread +
+  * sc_thread method_name (sensitivity list) <any C++ code> end sc_thread +
     Same as sc_method, but creates a SC_THREAD
 
 Verilog support
@@ -356,7 +358,7 @@ The python has the same API as the Ruby plugins.  The API is located in the
 +ariadne+ module, so that should be imported first.  The execution time of the
 scripts is also the same as for Ruby.
 
-The variables exported from {cpp} are shared between ruby and python.  +$module+
+The variables exported from C++ are shared between ruby and python.  +$module+
 can be modified in Ruby and then the modifications can be read in python.
 
 Ruby API
@@ -431,6 +433,11 @@ type is ModuleInstance and has following methods :
     Return value is a list of RubyXrf
   * haveUserXrf(instance:string, port:string) +
     Check if there is a xrf statement for given instance and port
+  * renameGenericInType(instance:string, type:string) +
+    Replace generic names in a port type of a submodule with the assigned/xrf'ed
+    value, if any. Can be used to e.g. calculate the width of a port that has
+    generics, and the generic was assigned a fixed value. +
+    Return a string with the names replaced
 
 The class SignalPort (returned by getPorts and getSignals) has following methods
 :
@@ -512,3 +519,9 @@ Ariadne fills in following placeholders in the template:
 * %designunit%: 'VHDL entity', 'VHDL architecture', 'VHDL configuration',
 'SystemC header file', 'SystemC implementation' or 'Verilog module'
 * %comment:<n>%: a comment line of length <n> 
+
+AUTHOR
+------
+
+Contact info: <tools@easics.be>
+

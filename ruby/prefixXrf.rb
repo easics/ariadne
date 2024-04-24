@@ -18,6 +18,9 @@
 # It has some limited type conversion knowledge :
 # std_logic,boolean <-> std_logic_vector,unsigned,signed (if vectors are 1 bit)
 # std_logic_vector <-> unsigned,signed
+# And some limited width conversion knowledge :
+# If the width can be deduced from the type string, and widths mismatch,
+# truncation or padding with 0 is done.  A warning is emitted on truncation.
 #
 # arguments:
 # * _instA_ : instance name of submodule A
@@ -54,14 +57,15 @@ modB.getPorts.each{|port|
 }
 
 if numMatchesA == 0 then
-  puts "Warning in prefixXrf: #{prefixA} does not match any ports in #{instA}"
+  puts "WARNING in prefixXrf: #{prefixA} does not match any ports in #{instA}"
 end
 if numMatchesB == 0 then
-  puts "Warning in prefixXrf: #{prefixB} does not match any ports in #{instB}"
+  puts "WARNING in prefixXrf: #{prefixB} does not match any ports in #{instB}"
 end
 haveConnections = false
 sorted_keys = portsA.keys.sort
 sorted_keys.each{|port|
+  portA = portsA[port]
   typeA = portsA[port].getType.downcase
   if portsB.has_key?(port)
     def isVectorType(type)
@@ -72,6 +76,7 @@ sorted_keys.each{|port|
     def isBit(type)
       return type == 'std_logic' || type == 'boolean';
     end
+    portB = portsB[port]
     typeB = portsB[port].getType.downcase
     indexA = indexB = ''
     if isBit(typeA) && isVectorType(typeB) then
@@ -86,7 +91,29 @@ sorted_keys.each{|port|
       atob = true
     end
     typeconversionAtoB = typeconversionBtoA = ''
+    padA = ''
+    padB = ''
+    widthA = -1
+    widthB = -1
     vectorconversion = false
+    typeARenamed = $module.renameGenericInType(instA, typeA)
+    typeARenamed.match(/\( *(?<high>[0-9 \/+*()-]+) +downto +0 *\)/) do |m|
+      widthA = eval(m[:high]) + 1
+    end
+    typeBRenamed = $module.renameGenericInType(instB, typeB)
+    typeBRenamed.match(/\( *(?<high>[0-9 \/+*()-]+) +downto +0 *\)/) do |m|
+      widthB = eval(m[:high]) + 1
+    end
+    widthmismatch = false
+    if widthA != -1 && widthB != -1
+      if widthA < widthB
+        widthmismatch = true
+        padA = '"' + '0' * (widthB - widthA) + '" & '
+      elsif widthB < widthA
+        widthmismatch = true
+        padB = '"' + '0' * (widthA - widthB) + '" & '
+      end
+    end
     if typeA[0..15] == 'std_logic_vector' && typeB[0..7] == 'unsigned' then
       signalA = signalPrefix + port
       signalB = signalPrefix + "unsigned_" + port
@@ -149,17 +176,57 @@ sorted_keys.each{|port|
       else
         $module.addStatements(signalA + " <= " + signalB + " = '1';\n")
       end
-    else
+    elsif
       signalA = signalPrefix + port
       signalB = signalPrefix + port
     end
     if vectorconversion then
       if atob then
-        $module.addStatements("  " + signalB + " <= " + typeconversionAtoB +
-                              "(" + signalA + ");\n")
+        if widthB < widthA
+          puts "WARNING in prefixXrf: Truncation of #{instA}/#{portA.getName}[#{widthA}] to #{instB}/#{portB.getName}[#{widthB}]"
+          $module.addStatements("  " + signalB + " <= " + typeconversionAtoB +
+                                "(" + signalA + "(#{widthB-1} downto 0));\n")
+        else # padA is empty if widths are equal
+          if widthA < widthB
+            puts "WARNING in prefixXrf: Padding of #{instA}/#{portA.getName}[#{widthA}] to #{instB}/#{portB.getName}[#{widthB}]"
+          end
+          $module.addStatements("  " + signalB + " <= " + padA + typeconversionAtoB +
+                                "(" + signalA + ");\n")
+        end
       else
-        $module.addStatements("  " + signalA + " <= " + typeconversionBtoA +
-                              "(" + signalB + ");\n")
+        if widthA < widthB
+          puts "WARNING in prefixXrf: Truncation of #{instB}/#{portB.getName}[#{widthB}] to #{instA}/#{portA.getName}[#{widthA}]"
+          $module.addStatements("  " + signalA + " <= " + typeconversionBtoA +
+                                "(" + signalB + "(#{widthA-1} downto 0));\n")
+        else # padB is empty if widths are equal
+          if widthA > widthB
+            puts "WARNING in prefixXrf: Padding of #{instB}/#{portB.getName}[#{widthB}] to #{instA}/#{portA.getName}[#{widthA}]"
+          end
+          $module.addStatements("  " + signalA + " <= " + padB + typeconversionBtoA +
+                                "(" + signalB + ");\n")
+        end
+      end
+    elsif widthmismatch
+      if atob then
+        if widthA < widthB
+          puts "WARNING in prefixXrf: Padding of #{instA}/#{portA.getName}[#{widthA}] to #{instB}/#{portB.getName}[#{widthB}]"
+          signalB = signalPrefix + "_big" + port
+          $module.addStatements("  #{signalB} <= #{padA}(#{signalA});\n")
+        else
+          puts "WARNING in prefixXrf: Truncation of #{instA}/#{portA.getName}[#{widthA}] to #{instB}/#{portB.getName}[#{widthB}]"
+          signalB = signalPrefix + "_small" + port
+          $module.addStatements("  #{signalB} <= (#{signalA}(#{widthB-1} downto 0));\n")
+        end
+      else
+        if widthB < widthA
+          puts "WARNING in prefixXrf: Padding of #{instB}/#{portB.getName}[#{widthB}] to #{instA}/#{portA.getName}[#{widthA}]"
+          signalA = signalPrefix + "_big" + port
+          $module.addStatements("  " + signalA + " <= " + padB + "(" + signalB + ");\n")
+        else
+          puts "WARNING in prefixXrf: Truncation of #{instB}/#{portB.getName}[#{widthB}] to #{instA}/#{portA.getName}[#{widthA}]"
+          signalA = signalPrefix + "_small" + port
+          $module.addStatements("  #{signalA} <= (#{signalB}(#{widthA-1} downto 0));\n")
+        end
       end
     end
 
@@ -170,6 +237,6 @@ sorted_keys.each{|port|
 }
 
 if not haveConnections then
-  puts "Warning in prefixXrf: No connections made between #{instA} and #{instB}"
+  puts "WARNING in prefixXrf: No connections made between #{instA} and #{instB}"
 end
 end

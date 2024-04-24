@@ -167,6 +167,11 @@ public:
   virtual void object_class(AST & node) {}
   virtual void signal_kind(AST & node) {}
   virtual void alias_decl(AST & node) {}
+  virtual void alias_opt_subtype_indic(AST & node) {}
+  virtual void alias_opt_signature(AST & node) {}
+  virtual void mark_list(AST & node) {}
+  virtual void opt_mark_list(AST & node) {}
+  virtual void alias_opt_return(AST & node) {}
   virtual void file_decl(AST & node) {}
   virtual void file_decl_common(AST & node) {}
   virtual void file_decl87(AST & node) {}
@@ -215,6 +220,8 @@ public:
   virtual void sel_signal_assign(AST & node) {}
   virtual void sel_wavefrms(AST & node) {}
   virtual void sel_wavefrms_2(AST & node) {}
+  virtual void generate_label(AST & node) {}
+  virtual void generate_stat_0(AST & node) {}
   virtual void generate_stat(AST & node) {}
   virtual void generate_stat_1(AST & node) {}
   virtual void procs_stat(AST & node) {}
@@ -424,6 +431,11 @@ public:
   virtual void object_class_exit(AST & node) {}
   virtual void signal_kind_exit(AST & node) {}
   virtual void alias_decl_exit(AST & node) {}
+  virtual void alias_opt_subtype_indic_exit(AST & node) {}
+  virtual void alias_opt_signature_exit(AST & node) {}
+  virtual void mark_list_exit(AST & node) {}
+  virtual void opt_mark_list_exit(AST & node) {}
+  virtual void alias_opt_return_exit(AST & node) {}
   virtual void file_decl_exit(AST & node) {}
   virtual void file_decl_common_exit(AST & node) {}
   virtual void file_decl87_exit(AST & node) {}
@@ -472,6 +484,8 @@ public:
   virtual void sel_signal_assign_exit(AST & node) {}
   virtual void sel_wavefrms_exit(AST & node) {}
   virtual void sel_wavefrms_2_exit(AST & node) {}
+  virtual void generate_label_exit(AST & node) {}
+  virtual void generate_stat_0_exit(AST & node) {}
   virtual void generate_stat_exit(AST & node) {}
   virtual void generate_stat_1_exit(AST & node) {}
   virtual void procs_stat_exit(AST & node) {}

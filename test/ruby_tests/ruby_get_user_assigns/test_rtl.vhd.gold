@@ -1,0 +1,40 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+-- EASICS generated file
+-- command : ariadne test.ari
+-- tool_version : 1.4.9
+-- input : test.ari
+-- input : a_ent.vhd
+
+architecture rtl of test is
+
+  component a
+    generic (
+          g_a : integer;
+          g_b : integer;
+          g_c : integer
+         );
+  end component;
+
+
+begin
+  a_0 : a
+    generic map (
+      g_a => g_a,
+      g_c => g_c,
+      g_b => 15)
+;
+
+end rtl;

@@ -12,14 +12,27 @@
 # You should have received a copy of the GNU General Public License along with
 # ariadne. If not, see <https://www.gnu.org/licenses/>.
 
-cmake_minimum_required(VERSION 3.16.3)
-project(ariadne LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.16.1)
+project(ariadne LANGUAGES CXX VERSION 1.4.33)
+
+# Auto add version to install dir
+string(APPEND CMAKE_INSTALL_PREFIX "/${CMAKE_PROJECT_VERSION}")
+
+# Include CTest for the regression
+include(CTest)
+
+# Set the target output directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
 ## Settings
 option(SCRIPT_RUBY "Support Ruby scripts" OFF)
 option(SCRIPT_PYTHON "Support Python scripts" OFF)
 
-if(SCRIPT_RUBY)
+option(BUILD_TESTS "Build tests" ON)
+
+if (SCRIPT_RUBY)
   add_compile_definitions(SCRIPT_RUBY)
 
   # Ruby dependencies
@@ -31,7 +44,7 @@ if(SCRIPT_RUBY)
   endif()
 endif()
 
-if(SCRIPT_PYTHON)
+if (SCRIPT_PYTHON)
   add_compile_definitions(SCRIPT_PYTHON)
 
   # Python dependencies
@@ -44,6 +57,23 @@ if (NOT (SCRIPT_RUBY OR SCRIPT_PYTHON))
 endif()
 
 ## Sources
+# External libs
 add_subdirectory(external/preprocessor)
 add_subdirectory(external/rubyexport)
+
+# Main source files
 add_subdirectory(src)
+
+# Documentation
+add_subdirectory(doc)
+
+# Regression suite
+if (BUILD_TESTS)
+  add_subdirectory(test)
+endif()
+
+file (GLOB RUBY_FILES "ruby/*.rb")
+include(GNUInstallDirs)
+install(TARGETS ariadne DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES ${RUBY_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ruby)
+install(FILES Changes TYPE DOC)

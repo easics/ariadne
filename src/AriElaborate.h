@@ -21,6 +21,7 @@
 #include "CaseAwareString.h"
 #include <map>
 #include <set>
+#include <vector>
 
 class ModuleInstance;
 class Module;
@@ -93,6 +94,11 @@ public:
   void print();
 
 private:
+  struct CodeWithSourceLoc
+    {
+      std::string code;
+      SourceLoc loc;
+    };
   typedef std::map<CaseAwareString, Module*> ModuleMap;
 
   // Get the module (type) with the designated name.
@@ -108,10 +114,10 @@ private:
   cvector<ModuleInstance*> currentModuleInstanceStack_;
   ModuleMap modules_;
   Module * currentInfoModule_;
-  StringUtil::stringlist rubycodes_;
-  StringUtil::stringlist rubypostcodes_;
-  StringUtil::stringlist pythoncodes_;
-  StringUtil::stringlist pythonpostcodes_;
+  std::vector<CodeWithSourceLoc> rubycodes_;
+  std::vector<CodeWithSourceLoc> rubypostcodes_;
+  std::vector<CodeWithSourceLoc> pythoncodes_;
+  std::vector<CodeWithSourceLoc> pythonpostcodes_;
   StringUtil::stringlist inputFiles_;
 };
 

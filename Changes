@@ -281,4 +281,36 @@ R"(
 ======
 - Removed other naming rules. Only easics naming rules are suported at the
   moment
+- Add support for group comments in xrfp
+- Fix reading output of vma (ariadne could hang when running vma)
+- Verilog parameters can now contain 'b literals
+
+1.4.29
+======
+- omit 'library work' statements, they are not needed
+- make renameGenericInType function available for scripting
+- prefixXrf knows a bit about bitwidths and how to truncate/pad
+- precompile renameports regular expressions for speed
+
+1.4.30
+======
+- Replace generics by their values: for generic assigns in scripting
+- Added sourceloc info for scripting sections
+
+1.4.31
+======
+- Added correct range conversion of the VHDL slices to Verilog slices if the
+  output must be Verilog
+
+1.4.32
+======
+- Improved error messages
+- Solved seg fault with the PortRename constructor
+- Solved the direction regex replacement with the PortRename feature
+
+1.4.33
+======
+- Replace defines in text
+- Fix for spaces in preprocessor macros
+
 )"

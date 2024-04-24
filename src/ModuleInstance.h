@@ -99,14 +99,16 @@ public:
   void addUserXrf(const CaseAwareString & lhsName,
                   const CaseAwareString & instance,
                   const CaseAwareString & rhsName)
-    { type_->addUserXrf(lhsName, instance, rhsName, 0); }
+    { type_->addUserXrf(lhsName, instance, rhsName, 0);
+      updateGenericRenames(lhsName, instance, rhsName); }
   void removeUserXrf(const CaseAwareString & instance,
                      const CaseAwareString & rhsName)
     { type_->removeUserXrf(instance, rhsName, 0); }
   void addUserAssign(const CaseAwareString & lhsName,
                      const CaseAwareString & instance,
                      const CaseAwareString & rhsName)
-    { type_->addUserAssign(lhsName, instance, rhsName, 0); }
+    { type_->addUserAssign(lhsName, instance, rhsName, 0);
+      updateGenericRenames(lhsName, instance, rhsName); }
   void addRenamePorts(const CaseAwareString & instanceName,
                       const CaseAwareString & from,
                       const CaseAwareString & to)
@@ -142,6 +144,15 @@ public:
                       bool portsNotGenerics) const;
   RubyXrfList getUserXrfs(const CaseAwareString & childInstanceName) const;
   RubyXrfList getUserAssigns(const CaseAwareString & childInstanceName) const;
+  // Collect all generic renames
+  // A generic can get a new name/value by xrf or assign
+  // Types that use this generic must also undergo the same renaming
+  void collectGenericRenames();
+  // Apply assigns and xrfs to generics in type names.
+  // e.g. assign 3 : inst_0/g_width; this function will replace the string
+  // g_dwidth with 3 in the argument type.
+  CaseAwareString renameGenericInType(const CaseAwareString & instanceName,
+                                      const CaseAwareString & type) const;
 
 private:
   typedef std::map<CaseAwareString, CaseAwareString> UserAssigns;
@@ -183,12 +194,6 @@ private:
                            const std::string & ariFile,
                            const StringUtil::stringlist & inputFiles);
   Context getContext() const;
-  // Collect all generic renames
-  // A generic can get a new name/value by xrf or assign
-  // Types that use this generic must also undergo the same renaming
-  void collectGenericRenames();
-  CaseAwareString renameGeneric(const CaseAwareString & instanceName,
-                                const CaseAwareString & type) const;
   void applyPortRename(const CaseAwareString & instanceName,
                        CaseAwareString & portName,
                        const CaseAwareString & direction);
@@ -205,6 +210,12 @@ private:
 
   FileHeader * getFileHeader() const;
   bool keepCase() const { return type_->keepCase(); }
+
+  void updateGenericRenames(const CaseAwareString & lhsName,
+                            const CaseAwareString & instanceName,
+                            const CaseAwareString & rhsName);
+
+  CaseAwareString rangeToVerilog(const CaseAwareString & name) const;
 
   const CaseAwareString instanceName_;
   Module * type_;

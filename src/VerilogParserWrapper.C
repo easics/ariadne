@@ -395,14 +395,16 @@ void VerilogParserWrapper::parameter_assign(AST & node)
   // and make the type std_logic_vector, because that is what I happen to need
   // today
   std::string parameterType = "integer";
-  CaseAwareString::size_type tickPos =
+  CaseAwareString::size_type tickHPos =
     defaultValue.find(CaseAwareString(false, "'h"));
-  if (tickPos != std::string::npos)
+  CaseAwareString::size_type tickBPos =
+    defaultValue.find(CaseAwareString(false, "'b"));
+  if (tickHPos != std::string::npos)
     {
       parameterType = "std_logic_vector";
       unsigned int bitWidth = std::stoul(defaultValue.str());
       defaultValue.replace("_", "");
-      defaultValue = defaultValue.substr(tickPos + 2);
+      defaultValue = defaultValue.substr(tickHPos + 2);
       if (bitWidth % 4 == 0)
         {
           defaultValue = CaseAwareString(true, std::string(bitWidth/4, '0')) +
@@ -417,6 +419,17 @@ void VerilogParserWrapper::parameter_assign(AST & node)
           defaultValue = defaultValue.substr(defaultValue.size() - bitWidth);
           defaultValue = "\"" + defaultValue + "\"";
         }
+    }
+  else if (tickBPos != std::string::npos)
+    {
+      parameterType = "std_logic_vector";
+      unsigned int bitWidth = std::stoul(defaultValue.str());
+      defaultValue.replace("_", "");
+      defaultValue = defaultValue.substr(tickBPos + 2);
+      defaultValue = CaseAwareString(true, std::string(bitWidth, '0')) +
+        defaultValue;
+      defaultValue = defaultValue.substr(defaultValue.size() - bitWidth);
+      defaultValue = "\"" + defaultValue + "\"";
     }
   else if (defaultValue == "\"FALSE\"")
     {

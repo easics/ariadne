@@ -35,6 +35,8 @@ bool VmaSearchInfo::runVma()
     {
       nread = fread(cline, 1, 4096, vmaOutput);
       vmaText += std::string(cline, nread);
+      if (feof(vmaOutput))
+        break;
       if (ferror(vmaOutput) && errno == EINTR)
         continue;
       if (nread == 0)
@@ -47,7 +49,7 @@ bool VmaSearchInfo::runVma()
       StringUtil::stringlist words = StringUtil::split(line, ' ');
       if (words.size() != 5)
         {
-          std::cerr << "Wrong line\n";
+          std::cerr << "Failed to parse vma output line: " << line << '\n';
           continue;
         }
       DesignUnit unit;

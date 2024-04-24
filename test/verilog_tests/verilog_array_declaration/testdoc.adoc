@@ -12,9 +12,7 @@
 // You should have received a copy of the GNU General Public License along with
 // ariadne. If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef AriadneVersionString_h_
-#define AriadneVersionString_h_
+Test description
+================
 
-static char const * const ariadneVersionString = "1.4.27";
-
-#endif
+Tests when an array declaration is present in a Verilog module

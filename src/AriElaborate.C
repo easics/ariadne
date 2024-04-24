@@ -23,6 +23,7 @@
 #include "VmaSearchInfo.h"
 #include "VectorAppend.h"
 #include "FileHeader.h"
+#include "SignalPort.h"
 #include <iostream>
 
 //using namespace StringUtil;
@@ -157,9 +158,14 @@ void AriElaborate::xrf(AST & node)
 void AriElaborate::xrfp(AST & node)
 {
   AST_list & nodes = node.getNodes();
-  AST_list & componentports = nodes[3]->getNodes();
+  CaseAwareString groupComment;
+  if (!nodes[1]->getNodes().empty())
+    groupComment = CaseAwareString(keepCase_,
+                                   nodes[1]->getNodes()[0]->getString()) +
+      "\n";
+  AST_list & componentports = nodes[4]->getNodes();
   CaseAwareString xrfToName = CaseAwareString(keepCase_,
-                                              strip(nodes[1]->text()));
+                                              strip(nodes[2]->text()));
   for (AST_list::const_iterator componentport=componentports.begin();
        componentport!=componentports.end(); ++componentport)
     {
@@ -175,9 +181,11 @@ void AriElaborate::xrfp(AST & node)
     currentInfoModule_->addPort(xrfToName,
                                 CaseAwareString(keepCase_, "auto"),
                                 CaseAwareString(true, "@UNKNOWN@"),
-                                CaseAwareString(),
+                                groupComment,
                                 SourceLocManager::registerNode(filename_,
                                                                &node));
+  else
+    existingPort->setGroupComment(groupComment);
 }
 
 void AriElaborate::library(AST & node)
@@ -443,25 +451,37 @@ void AriElaborate::post_exec_script(AST & node)
 void AriElaborate::rubycode(AST & node)
 {
   AST_list & nodes = node.getNodes();
-  rubycodes_.push_back(nodes[1]->getString());
+  CodeWithSourceLoc info;
+  info.code = nodes[1]->getString();
+  info.loc = SourceLocManager::registerNode(filename_, &node);
+  rubycodes_.push_back(info);
 }
 
 void AriElaborate::rubypostcode(AST & node)
 {
   AST_list & nodes = node.getNodes();
-  rubypostcodes_.push_back(nodes[1]->getString());
+  CodeWithSourceLoc info;
+  info.code = nodes[1]->getString();
+  info.loc = SourceLocManager::registerNode(filename_, &node);
+  rubypostcodes_.push_back(info);
 }
 
 void AriElaborate::pythoncode(AST & node)
 {
   AST_list & nodes = node.getNodes();
-  pythoncodes_.push_back(nodes[1]->getString());
+  CodeWithSourceLoc info;
+  info.code = nodes[1]->getString();
+  info.loc = SourceLocManager::registerNode(filename_, &node);
+  pythoncodes_.push_back(info);
 }
 
 void AriElaborate::pythonpostcode(AST & node)
 {
   AST_list & nodes = node.getNodes();
-  pythonpostcodes_.push_back(nodes[1]->getString());
+  CodeWithSourceLoc info;
+  info.code = nodes[1]->getString();
+  info.loc = SourceLocManager::registerNode(filename_, &node);
+  pythonpostcodes_.push_back(info);
 }
 
 void AriElaborate::sc_method(AST & node)
@@ -549,21 +569,51 @@ void AriElaborate::addIncludedFiles(std::set<std::string> const & files)
 
 void AriElaborate::resolve()
 {
+  hierarchy_->collectGenericRenames();
+
   ScriptInterface::instance().makeGlobalVariable("module", hierarchy_);
-  for (StringUtil::stringlist::const_iterator code=rubycodes_.begin();
-       code!=rubycodes_.end(); ++code)
+  for (auto & rubycode : rubycodes_)
     {
 #ifdef SCRIPT_RUBY
-      ScriptInterface::instance().runRubyString(*code);
+      try
+        {
+          ScriptInterface::instance().runRubyString(rubycode.code);
+        }
+      catch (AriException & e)
+        {
+          SourceLocInfo locInfo =
+            SourceLocManager::instance().resolveSourceLoc(rubycode.loc);
+          throw AriException(locInfo.str() + e.getMessage());
+        }
+      catch (std::exception & e)
+        {
+          SourceLocInfo locInfo =
+            SourceLocManager::instance().resolveSourceLoc(rubycode.loc);
+          throw std::runtime_error(locInfo.str() + e.what());
+        }
 #else
       throw AriException(EX_NO_RUBY_SUPPORT, filename_);
 #endif
     }
-  for (StringUtil::stringlist::const_iterator code=pythoncodes_.begin();
-       code!=pythoncodes_.end(); ++code)
+  for (auto & pythoncode : pythoncodes_)
     {
 #ifdef SCRIPT_PYTHON
-      ScriptInterface::instance().runPythonString(*code);
+      try
+        {
+          ScriptInterface::instance().runPythonString(pythoncode.code);
+        }
+      catch (AriException & e)
+        {
+          SourceLocInfo locInfo =
+            SourceLocManager::instance().resolveSourceLoc(pythoncode.loc);
+          throw AriException(locInfo.str() + e.getMessage());
+        }
+      catch (std::exception & e)
+        {
+          SourceLocInfo locInfo =
+            SourceLocManager::instance().resolveSourceLoc(pythoncode.loc);
+          throw std::runtime_error(locInfo.str() + e.what());
+        }
 #else
       throw AriException(EX_NO_PYTHON_SUPPORT, filename_);
 #endif
@@ -576,20 +626,48 @@ void AriElaborate::generate(const StringUtil::stringlist & argv)
 {
   // scripting code needs access to group/port comments
   hierarchy_->applyGroupComments();
-  for (StringUtil::stringlist::const_iterator code=rubypostcodes_.begin();
-       code!=rubypostcodes_.end(); ++code)
+  for (auto & rubypostcode : rubypostcodes_)
     {
 #ifdef SCRIPT_RUBY
-      ScriptInterface::instance().runRubyString(*code);
+      try
+        {
+          ScriptInterface::instance().runRubyString(rubypostcode.code);
+        }
+      catch (AriException & e)
+        {
+          SourceLocInfo locInfo =
+            SourceLocManager::instance().resolveSourceLoc(rubypostcode.loc);
+          throw AriException(locInfo.str() + e.getMessage());
+        }
+      catch (std::exception & e)
+        {
+          SourceLocInfo locInfo =
+            SourceLocManager::instance().resolveSourceLoc(rubypostcode.loc);
+          throw std::runtime_error(locInfo.str() + e.what());
+        }
 #else
       throw AriException(EX_NO_RUBY_SUPPORT, filename_);
 #endif
     }
-  for (StringUtil::stringlist::const_iterator code=pythonpostcodes_.begin();
-       code!=pythonpostcodes_.end(); ++code)
+  for (auto & pythonpostcode : pythonpostcodes_)
     {
 #ifdef SCRIPT_PYTHON
-      ScriptInterface::instance().runPythonString(*code);
+      try
+        {
+          ScriptInterface::instance().runPythonString(pythonpostcode.code);
+        }
+      catch (AriException & e)
+        {
+          SourceLocInfo locInfo =
+            SourceLocManager::instance().resolveSourceLoc(pythonpostcode.loc);
+          throw AriException(locInfo.str() + e.getMessage());
+        }
+      catch (std::exception & e)
+        {
+          SourceLocInfo locInfo =
+            SourceLocManager::instance().resolveSourceLoc(pythonpostcode.loc);
+          throw std::runtime_error(locInfo.str() + e.what());
+        }
 #else
       throw AriException(EX_NO_PYTHON_SUPPORT, filename_);
 #endif

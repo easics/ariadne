@@ -26,6 +26,7 @@
 #include "VectorAppend.h"
 #include "AriException.h"
 #include "FileHeader.h"
+#include "SourceLocManager.h"
 #include <set>
 #include <algorithm>
 #include <iterator>
@@ -278,7 +279,6 @@ void ModuleInstance::resolve()
     {
       (*instance)->resolve();
     }
-  collectGenericRenames();
 
   const CaseAwareString outString(keepCase(), "out");
   const CaseAwareString inString(keepCase(), "in");
@@ -551,9 +551,15 @@ void ModuleInstance::resolve()
           if (type_->haveUserXrf(port->first, portGroup->first))
             continue;
           CaseAwareString newType =
-            renameGeneric(port->first, port->second->getType());
+            renameGenericInType(port->first, port->second->getType());
           if (type.find('(') == std::string::npos &&
               newType.find('(') != std::string::npos)
+            {
+              type = newType;
+              break;
+            }
+          if (type.find(CaseAwareString(false, " range ")) == std::string::npos &&
+              newType.find(CaseAwareString(false, " range ")) != std::string::npos)
             {
               type = newType;
               break;
@@ -865,7 +871,7 @@ void ModuleInstance::resolve()
                   if (userXrf->second.find_first_of("().") ==
                       std::string::npos)
                     {
-                      type = renameGeneric((*instance)->instanceName_,
+                      type = renameGenericInType((*instance)->instanceName_,
                                            subSigPort->getType());
                     }
 
@@ -882,7 +888,7 @@ void ModuleInstance::resolve()
                           std::string::npos)
                         {
                           CaseAwareString type =
-                            renameGeneric((*instance)->instanceName_,
+                            renameGenericInType((*instance)->instanceName_,
                                           subSigPort->getType());
                           sigPort->setType(type);
                           SignalPort * relatedPort = sigPort->getRelatedPort();
@@ -896,7 +902,7 @@ void ModuleInstance::resolve()
                       // one had an unconstrainted type -> prefer the
                       // constrained one
                       CaseAwareString type =
-                        renameGeneric((*instance)->instanceName_,
+                        renameGenericInType((*instance)->instanceName_,
                                       subSigPort->getType());
                       if (userXrf->second.find_first_of("().") ==
                           std::string::npos)
@@ -925,7 +931,7 @@ void ModuleInstance::resolve()
                 {
                   subSigPort =
                     new SignalPort(userXrf->second,
-                                   renameGeneric((*instance)->instanceName_,
+                                   renameGenericInType((*instance)->instanceName_,
                                                  subSigPort->getType()), false,
                                    subSigPort->getDirection(), sourceLoc_);
                 }
@@ -1477,7 +1483,8 @@ void ModuleInstance::generateVhdl(const StringUtil::stringlist & argv,
 
       for (std::set<CaseAwareString>::const_iterator lib=libs.begin();
            lib!=libs.end(); ++lib)
-        cfg << "library " << *lib << ";\n";
+        if (*lib != "work")
+          cfg << "library " << *lib << ";\n";
 
       cfg << "configuration " << configurationName
         << " of " << entityName << " is\n"
@@ -1515,7 +1522,8 @@ void ModuleInstance::generateVhdl(const StringUtil::stringlist & argv,
 
           for (std::set<CaseAwareString>::const_iterator lib=libs.begin();
                lib!=libs.end(); ++lib)
-            cfg << "library " << *lib << ";\n";
+            if (*lib != "work")
+              cfg << "library " << *lib << ";\n";
 
           cfg << "configuration " << config->name << " of " << entityName
             << " is\n"
@@ -1611,6 +1619,8 @@ void ModuleInstance::writePorts(SmartFile & file, const PortList & ports,
             throw AriException(EX_INTERNAL_ERROR, "Port group not found");
           if (!portGroup->first.empty())
             file << portGroup->first << "\n";
+          else
+            file << "\n";
           PortList sortedPorts = portGroup->second;
           std::sort(sortedPorts.begin(), sortedPorts.end(),
                     [] (SignalPort * p1, SignalPort * p2)
@@ -1823,17 +1833,23 @@ void ModuleInstance::collectGenericRenames()
       for (Module::UserXrfList::const_iterator userXrf=userXrfs.begin();
            userXrf!=userXrfs.end(); ++userXrf)
         {
-          ConstGeneric * subConstGeneric =
-            (*instance)->type_->getConstGeneric(userXrf->second);
-
-          if (subConstGeneric)
-            if (!subConstGeneric->isConstant())
-              {
-                generic_rename_info rename;
-                rename.origname = userXrf->second;
-                rename.newname = userXrf->first;
-                genericRenames_[(*instance)->instanceName_].push_back(rename);
-              }
+          try
+            {
+              updateGenericRenames(userXrf->first, (*instance)->instanceName_,
+                                   userXrf->second);
+            }
+          catch (AriException & e)
+            {
+              SourceLocInfo locInfo =
+                SourceLocManager::instance().resolveSourceLoc((*userXrf).loc);
+              throw AriException(locInfo.str() + e.getMessage());
+            }
+          catch (std::exception & e)
+            {
+              SourceLocInfo locInfo =
+                SourceLocManager::instance().resolveSourceLoc((*userXrf).loc);
+              throw std::runtime_error(locInfo.str() + e.what());
+            }
         }
     }
   // Renames by assign
@@ -1845,23 +1861,30 @@ void ModuleInstance::collectGenericRenames()
       for (Module::UserXrfList::const_iterator userAssign=userAssigns.begin();
            userAssign!=userAssigns.end(); ++userAssign)
         {
-          ConstGeneric * subConstGeneric =
-            (*instance)->type_->getConstGeneric(userAssign->second);
-          if (subConstGeneric)
-            if (!subConstGeneric->isConstant())
-              {
-                generic_rename_info rename;
-                rename.origname = userAssign->second;
-                rename.newname = userAssign->first;
-                genericRenames_[(*instance)->instanceName_].push_back(rename);
-              }
+          try
+            {
+              updateGenericRenames(userAssign->first, (*instance)->instanceName_,
+                                   userAssign->second);
+            }
+          catch (AriException & e)
+            {
+              SourceLocInfo locInfo =
+                SourceLocManager::instance().resolveSourceLoc((*userAssign).loc);
+              throw AriException(locInfo.str() + e.getMessage());
+            }
+          catch (std::exception & e)
+            {
+              SourceLocInfo locInfo =
+                SourceLocManager::instance().resolveSourceLoc((*userAssign).loc);
+              throw std::runtime_error(locInfo.str() + e.what());
+            }
         }
     }
 }
 
 CaseAwareString
-ModuleInstance::renameGeneric(const CaseAwareString & instanceName,
-                              const CaseAwareString & type) const
+ModuleInstance::renameGenericInType(const CaseAwareString & instanceName,
+                                    const CaseAwareString & type) const
 {
   GenericRenames::const_iterator genericRenamesInModule =
     genericRenames_.find(instanceName);
@@ -1871,7 +1894,7 @@ ModuleInstance::renameGeneric(const CaseAwareString & instanceName,
         StringUtil::keywordsplit(type,
                                  "abcdefghijklmnopqrstuvwxyz"
                                  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                 "0123456789_*"
+                                 "0123456789_"
                                  );
       // Replace all generics ...
       for (GenericRenameList::const_iterator genericRename =
@@ -1901,7 +1924,7 @@ ModuleInstance::renameGeneric(const CaseAwareString & instanceName,
           sl = StringUtil::keywordsplit(join(" ", sl),
                                         "abcdefghijklmnopqrstuvwxyz"
                                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                        "0123456789*_"
+                                        "0123456789_"
                                        );
           // ... in all matching words of the type
           for (auto s=sl.begin(); s!=sl.end(); ++s)
@@ -1971,6 +1994,10 @@ ModuleInstance::renameGeneric(const CaseAwareString & instanceName,
       StringUtil::replace(" (", "(", result);
       StringUtil::replace(" )", ")", result);
       StringUtil::replace("  ", " ", result);
+      StringUtil::replace("* *", "**", result);
+      StringUtil::replace("/ =", "/=", result);
+      StringUtil::replace("< =", "<=", result);
+      StringUtil::replace("> =", ">=", result);
       return result;
     }
   return type;
@@ -1985,61 +2012,22 @@ void ModuleInstance::applyPortRename(const CaseAwareString & instanceName,
     portRenames.find(instanceName);
   if (renameList == portRenames.end())
     return;
-  cvector<std::tuple<Module::PortRename, std::regex, std::regex>>
-    renameCompiledRegexes;
   for (auto rename : renameList->second)
     {
-      using StringUtil::strip;
-      std::regex matchExp;
-      matchExp.assign(strip(strip(rename.match, "/")).str());
-      std::regex renameExp;
-      renameExp.assign(rename.first.strCase());
-      renameCompiledRegexes.push_back({ rename, matchExp, renameExp });
-    }
-  for (auto rename : renameCompiledRegexes)
-    {
-      if (!std::get<0>(rename).match.empty())
+      if (!rename.matchAll)
         {
-          if (!std::regex_search(portName.strCase(), std::get<1>(rename),
+          if (!std::regex_search(portName.strCase(), rename.match,
                                  std::regex_constants::format_sed))
             continue;
         }
-      CaseAwareString what = std::get<0>(rename).first;
-      StringUtil::replace("$dir", direction, what);
-      CaseAwareString by = std::get<0>(rename).second;
-      StringUtil::replace("$dir", direction, by);
-      CaseAwareString shortDirection = direction.substr(0, 1);
-      if (direction == "inout")
-        shortDirection = CaseAwareString(direction.caseSensitive(), "io");
-      StringUtil::replace("$d", shortDirection, what);
-      StringUtil::replace("$d", shortDirection, by);
-      CaseAwareString reverseDirection;
-      CaseAwareString reverseDirectionShort;
-      if (direction == "in")
-        {
-          reverseDirection = CaseAwareString(direction.caseSensitive(), "out");
-          reverseDirectionShort =CaseAwareString(direction.caseSensitive(),"o");
-        }
-      else if (direction == "out")
-        {
-          reverseDirection = CaseAwareString(direction.caseSensitive(), "in");
-          reverseDirectionShort =CaseAwareString(direction.caseSensitive(),"i");
-        }
-      else
-        {
-          reverseDirection = CaseAwareString(direction.caseSensitive(),"inout");
-          reverseDirectionShort =
-            CaseAwareString(direction.caseSensitive(),"io");
-        }
-      StringUtil::replace("$notdir", reverseDirection, what);
-      StringUtil::replace("$notdir", reverseDirection, by);
-      StringUtil::replace("$nd", reverseDirectionShort, what);
-      StringUtil::replace("$nd", reverseDirectionShort, by);
+      auto by = rename.replacement;
+      by = Module::PortRename::applyDirection(by, direction);
 
       portName =
         CaseAwareString(portName.caseSensitive(),
                         std::regex_replace(portName.str(),
-                                           std::get<2>(rename), by.str(),
+                                           rename.originals[direction.strLower()],
+                                           by.str(),
                                            std::regex_constants::format_sed));
     }
 }
@@ -2476,8 +2464,11 @@ void ModuleInstance::generateVerilog(const StringUtil::stringlist & argv,
           for (Module::XrfList::const_iterator xrf=xrfs.begin();
                xrf!=xrfs.end(); ++xrf)
             {
+              // Verilog does not allow a range on the left hand side of the
+              // port map
               lines.push_back("." + xrf->getChild()->getName() + "(" +
-                              xrf->getParent()->getName() + ")");
+                              rangeToVerilog(xrf->getParent()->getName()) +
+                              ")");
             }
           for (Module::AssignList::const_iterator assign=assigns.begin();
                assign!=assigns.end(); ++assign)
@@ -2503,7 +2494,7 @@ void ModuleInstance::generateVerilog(const StringUtil::stringlist & argv,
             {
               std::string childName;
               std::string parentName;
-              parentName = xrf->getParent()->getName().str();
+              parentName = rangeToVerilog(xrf->getParent()->getName()).str();
               if ((*instance)->type_->keepCase())
                 childName = xrf->getChild()->getName().str();
               else
@@ -2703,6 +2694,50 @@ FileHeader * ModuleInstance::getFileHeader() const
       header = type_->getFileHeader();
     }
   return header;
+}
+
+void ModuleInstance::updateGenericRenames(const CaseAwareString & lhsName,
+                                          const CaseAwareString & instanceName,
+                                          const CaseAwareString & rhsName)
+{
+  ModuleInstance * instance = getSubInstance(instanceName);
+  if (instance == nullptr)
+    {
+      // Throw exception: Sourceloc undefined as the ruby will catch it
+      // and throw its own with the right sourceloc
+      throw AriException(EX_NO_SUCH_INSTANCE, type_->getEntityName().str(),
+                         instanceName.str(), 0);
+    }
+
+  ConstGeneric * subConstGeneric = instance->type_->getConstGeneric(rhsName);
+
+  if (subConstGeneric)
+    {
+      if (!subConstGeneric->isConstant())
+        {
+          generic_rename_info rename;
+          rename.origname = rhsName;
+          rename.newname = lhsName;
+          genericRenames_[instanceName].push_back(rename);
+        }
+    }
+}
+
+CaseAwareString ModuleInstance::rangeToVerilog(const CaseAwareString & name) const
+{
+  // Transform the VHDL range to the Verilog equivalent
+  const std::string::size_type rangeBeginIndex = name.find_first_of("(");
+
+  if (rangeBeginIndex == std::string::npos) {return name;}
+
+  const CaseAwareString baseName = name.substr(0, rangeBeginIndex);
+
+  CaseAwareString range = name.substr(rangeBeginIndex);
+  range.replace("(", "[", 1);
+  StringUtil::rreplace(')', "]", range, 1);
+  range.replace(" downto ", ":");
+
+  return baseName + range;
 }
 
 std::ostream & operator<<(std::ostream & str, ModuleInstance & instance)

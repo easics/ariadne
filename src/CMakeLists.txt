@@ -38,12 +38,17 @@ endif()
 ## Linking dependencies
 target_link_libraries(ariadne PreProcess)
 
+if (SCRIPT_RUBY OR SCRIPT_PYTHON)
+  target_link_libraries(ariadne rubyexport ${CMAKE_DL_LIBS})
+endif()
+
 if (SCRIPT_RUBY)
-  target_link_libraries(ariadne rubyexport ${RUBY_LIBRARY} ${CMAKE_DL_LIBS})
+  target_link_libraries(ariadne ${RUBY_LIBRARY})
+  set_target_properties(ariadne PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif()
 
 if (SCRIPT_PYTHON)
-  target_link_libraries(ariadne rubyexport ${Python_LIBRARY} ${CMAKE_DL_LIBS})
+  target_link_libraries(ariadne ${Python_LIBRARIES})
 endif()
 
 ## Package dependencies for parsers
@@ -80,8 +85,6 @@ FLEX_TARGET(verilogScanner
             COMPILE_FLAGS "-P verilog")
 ADD_FLEX_BISON_DEPENDENCY(verilogScanner verilogParser)
 
-target_link_libraries(ariadne ${FLEX_LIBRARIES})
-
 ## File list
 target_sources(ariadne
   PRIVATE
@@ -104,7 +107,6 @@ target_sources(ariadne
     ExecScript.C
     FileHeader.C
     GeneratedBlock.C
-    lex.yy.c
     Module.C
     ModuleInstance.C
     NamingRules.C
@@ -130,3 +132,11 @@ target_sources(ariadne
     ${BISON_verilogParser_OUTPUTS}
     ${FLEX_verilogScanner_OUTPUTS}
 )
+
+set(VERSION "${CMAKE_PROJECT_VERSION}")
+configure_file(AriadneVersionString.h.in
+               AriadneVersionString.h
+               @ONLY)
+target_include_directories(ariadne
+  PRIVATE
+  ${CMAKE_CURRENT_BINARY_DIR})

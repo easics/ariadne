@@ -24,6 +24,7 @@
                         bool consumeLookFor);
 
 %}
+%error-verbose
 
 %token HIERARCHY INFO END PORT GENERIC SIGNAL CONSTANT XRFP XRF ASSIGN TLN_FROM LIBRARY CONFIGURATION ARCHITECTURE COMPONENT STATEMENTS DECLARATIONS DECLARATIONSTOP RUBY_POST RUBY PYTHON_POST PYTHON REMOVE_PACKAGE ADD_PACKAGE MOVE_PACKAGE EXEC POST_EXEC IN OUT INOUT AUTO VARASSIGN RENAME_PORTS GROUP_COMMENT PORT_COMMENT KEEP_CASE LANGUAGE ADD_HEADER MOVE_HEADER REMOVE_HEADER CREATE SC_METHOD SC_THREAD CONFIG_IN_ARCH ENTITY_COMMENT ARCH_COMMENT INST_COMMENT FILE_HEADER IDENTIFIER
 
@@ -1296,7 +1297,7 @@ identifier_list :
   $$ = $1;
 }
 ;
-xrfp : XRFP selected_ident ':' componentports ';' 
+xrfp : XRFP opt_group_comment selected_ident ':' componentports ';' 
 {
   $$ = new AST;
   $$->setName("xrfp");
@@ -1305,8 +1306,9 @@ xrfp : XRFP selected_ident ':' componentports ';'
   $$->column_number = ariFilecolumn_number;
   $$->addNode($1);
   $$->addNode($2);
+  $$->addNode($3);
   $$->addNode(new AST(':'));
-  $$->addNode($4);
+  $$->addNode($5);
   $$->addNode(new AST(';'));
 }
 ;

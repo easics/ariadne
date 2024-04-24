@@ -82,7 +82,8 @@ REFLECT_CLASS(ModuleInstance)
   .DEF_F(getXrfs)
   .DEF_F(getUserXrfs)
   .DEF_F(getUserAssigns)
-  .DEF_F(haveUserXrf);
+  .DEF_F(haveUserXrf)
+  .DEF_F(renameGenericInType);
 }
 
 REFLECT_CLASS_DERIVED(ConstGeneric, XrfBase)

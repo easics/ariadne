@@ -1,0 +1,47 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+hierarchy test
+{
+  a_0 : a;
+  b_0 : b;
+  a_1 : a;
+  b_1 : b;
+};
+
+info test
+{
+  assign 4 : a_0/g_dwidth;
+  assign 6 : b_0/g_dwidth;
+  ruby
+    require_relative '../../../ruby/prefixXrf.rb'
+    prefixXrf('a_0', 'prea', 'b_0', 'preb', 'a0_to_b0')
+  end ruby;
+
+  assign 6 : a_1/g_dwidth;
+  assign 4 : b_1/g_dwidth;
+  ruby
+    prefixXrf('a_1', 'prea', 'b_1', 'preb', 'a1_to_b1')
+  end ruby;
+};
+
+info a
+{
+  from : a_ent.vhd;
+};
+
+info b
+{
+  from : b_ent.vhd;
+};

@@ -1,0 +1,72 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+-- EASICS generated file
+-- command : ariadne test.ari
+-- input : test.ari
+-- input : spi_master_ent.vhd
+-- input : spi_slave_ent.vhd
+
+architecture rtl of test is
+
+  signal cs : std_logic;
+  signal miso : std_logic;
+  signal mosi : std_logic;
+  signal sck : std_logic;
+  component spi_master
+    port (
+          --/ System
+          clk : in std_logic;
+          reset : in std_logic;
+          --/ SPI interface
+          sck : out std_logic;
+          cs : out std_logic;
+          mosi : out std_logic;
+          miso : in std_logic
+         );
+  end component;
+
+  component spi_slave
+    port (
+          --/ System
+          clk : in std_logic;
+          reset : in std_logic;
+          --/ SPI interface
+          sck : in std_logic;
+          cs : in std_logic;
+          mosi : in std_logic;
+          miso : out std_logic
+         );
+  end component;
+
+
+begin
+  spi_master_i : spi_master
+    port map (
+      clk => clk,
+      cs => cs,
+      miso => miso,
+      mosi => mosi,
+      reset => reset,
+      sck => sck);
+  spi_slave_i : spi_slave
+    port map (
+      clk => clk,
+      cs => cs,
+      miso => miso,
+      mosi => mosi,
+      reset => reset,
+      sck => sck);
+
+end rtl;

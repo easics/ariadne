@@ -1,0 +1,56 @@
+-- This file is part of ariadne.
+--
+-- ariadne is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- ariadne is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+-- PARTICULAR PURPOSE. See the GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- ariadne. If not, see <https://www.gnu.org/licenses/>.
+
+-- EASICS generated file
+-- command : ariadne test.ari
+-- tool_version : 1.4.26
+-- input : test.ari
+-- input : a.v
+
+architecture rtl of test is
+
+  component a
+    generic (
+          g_w2 : integer := 32;
+          g_w3 : integer := 16;
+          g_w1 : integer := 8
+         );
+    port (
+          clk : in std_logic;
+          d1 : in std_logic_vector(g_w1 - 1 downto 0);
+          d2 : in std_logic_vector(g_w2 + 1 downto 0);
+          b : in std_logic_vector(3 downto 0);
+          c : in std_logic_vector(3 downto 0);
+          d_ : in std_logic_vector(3 downto 0);
+          d3 : out std_logic_vector(g_w3 * 2 - 1 downto 0)
+         );
+  end component;
+
+
+begin
+  a_0 : a
+    generic map (
+      g_w1 => g_w1,
+      g_w2 => g_w2,
+      g_w3 => g_w3)
+    port map (
+      b => b,
+      c => c,
+      clk => clk,
+      d1 => d1,
+      d2 => d2,
+      d3 => d3,
+      d_ => d);
+
+end rtl;
