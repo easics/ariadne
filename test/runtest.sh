@@ -1,3 +1,5 @@
+#! /bin/bash -e
+
 # This file is part of ariadne.
 #
 # ariadne is free software: you can redistribute it and/or modify it under
@@ -12,7 +14,6 @@
 # You should have received a copy of the GNU General Public License along with
 # ariadne. If not, see <https://www.gnu.org/licenses/>.
 
-#! /bin/bash -e
 
 usage() {
   echo "runtest version 0.1"
