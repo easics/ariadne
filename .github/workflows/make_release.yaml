@@ -1,0 +1,37 @@
+name: Make release
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Install packages
+      run: >
+        sudo apt-get install -y build-essential
+                                python3-dev
+                                ruby-dev
+                                flex bison
+                                libfl-dev
+
+    - name: Configure CMake
+      run: >
+        cmake -B ${{ github.workspace }}/build
+              -S ${{ github.workspace }}
+              #-D SCRIPT_RUBY=ON
+
+    - name: Build with CMake
+      run: >
+        cmake --build ${{ github.workspace }}/build
+              -j 16
+
+    - name: Running CTest
+      run: >
+        ctest --test-dir ${{ github.workspace }}/build
+              --output-on-failure
+              -j 16
