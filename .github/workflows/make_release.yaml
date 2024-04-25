@@ -17,13 +17,13 @@ jobs:
                                    ruby-dev
                                    flex
                                    bison
-                                   libfl-dev
                                    asciidoctor
 
     - name: Configure CMake
       run: cmake -B ${{ github.workspace }}/build
                  -S ${{ github.workspace }}
                  -D SCRIPT_RUBY=ON
+                 -D SCRIPT_PYTHON=ON
 
     - name: Build with CMake
       run: cmake --build ${{ github.workspace }}/build
