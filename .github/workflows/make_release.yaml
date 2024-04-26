@@ -36,6 +36,7 @@ jobs:
         run: gh release create $RELEASE_VERSION
                                --verify-tag
                                --title $RELEASE_VERSION
+                               --notes ""
 
     outputs:
       version: ${{ env.RELEASE_VERSION }}
@@ -62,43 +63,141 @@ jobs:
       - name: Install Ruby plugins
         run: sudo gem install asciidoctor-pdf
 
-      - name: Configure CMake
-        run: cmake -B ${{ github.workspace }}/build
-                   -S ${{ github.workspace }}
-                   -D SCRIPT_RUBY=ON
-                   -D SCRIPT_PYTHON=ON
+      - name: Set the build directory for the packages
+        run: echo "PACKAGE_BUILD_DIR=${{ github.workspace }}/package_build_dir" >> $GITHUB_ENV
 
-      - name: Build with CMake
-        run: cmake --build ${{ github.workspace }}/build
+      - name: Set the install directory for the packages
+        run: echo "PACKAGE_INSTALL_DIR=${{ github.workspace }}/package_install_dir" >> $GITHUB_ENV
+
+      - name: Install the GCC package
+        shell: bash
+        run: |
+          cd $PACKAGE_BUILD_DIR
+          # TODO which GCC version
+          wget https://ftp.gwdg.de/pub/misc/gcc/releases/gcc-10.5.0/gcc-10.5.0.tar.xz
+          tar xf gcc-10.5.0.tar.xz
+          cd gcc-10.5.0
+          contrib/download_prerequisites
+          cd ..
+          mkdir gcc-10.5.0.build
+          cd gcc-10.5.0.build
+          ../gcc-10.5.0/configure --prefix=$PACKAGE_INSTALL_DIR/gcc/10.5.0 --enable-languages=c,c++ --enable-threads
+          make -j16
+          make install
+
+      - name: Update the PATH variable to use the new GCC from now on
+        shell: bash
+        run: |
+          # TODO the env variable must be passed along with the GITHUB variables
+          export PATH=$PACKAGE_INSTALL_DIR/gcc/10.5.0/bin:$PATH
+          export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/gcc/10.5.0/lib64:$LD_LIBRARY_PATH
+
+      - name: Install the Python package
+        shell: bash
+        run: |
+          cd $PACKAGE_BUILD_DIR
+          wget https://www.python.org/ftp/python/3.8.17/Python-3.10.12.tgz
+          tar -zxf Python-3.10.12.tgz
+          mkdir Python-3.10.12.build
+          cd Python-3.10.12.build
+          ../Python-3.10.12/configure --prefix=$PACKAGE_INSTALL_DIR/python/3.10.12 --enable-shared --enable-optimizations
+          make -j16
+          make install
+
+      - name: Update the PATH variable to use the new Python from now on
+        shell: bash
+        run: |
+          export PATH=$PACKAGE_INSTALL_DIR/python/3.10.12/bin:$PATH
+          export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/3.10.12/lib:$LD_LIBRARY_PATH
+
+      - name: Install the Ruby package
+        shell: bash
+        run: |
+          cd $PACKAGE_BUILD_DIR
+          wget https://cache.ruby-lang.org/pub/ruby/3.3/ruby-3.3.1.tar.gz
+          tar -zxf ruby-3.3.1.tar.gz
+          mkdir ruby-3.3.1.build
+          cd ruby-3.3.1.build
+          ../ruby-3.3.1/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/3.3.1
+          make -j16
+          make install
+
+      - name: Update the PATH variable to use the new Ruby from now on
+        shell: bash
+        run: |
+          export PATH=$PACKAGE_INSTALL_DIR/ruby/3.3.1/bin:$PATH
+          export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/3.3.1/lib:$LD_LIBRARY_PATH
+
+      # TODO do we need to install the CMake package
+      # TODO Should I add a version number after the ariadne install dir
+
+      - name: Configure CMake for Ariadne
+        run: MY_RUBY_HOME=$PACKAGE_INSTALL_DIR/ruby/3.3.1 cmake -B $PACKAGE_BUILD_DIR/ariadne
+                                                                -S ${{ github.workspace }}
+                                                                -D SCRIPT_RUBY=ON
+                                                                -D SCRIPT_PYTHON=ON
+                                                                -D CMAKE_INSTALL_PREFIX=$PACKAGE_INSTALL_DIR/ariadne
+
+      - name: Build Ariadne with CMake
+        run: cmake --build $PACKAGE_BUILD_DIR/ariadne
                    -j 16
 
-      - name: Determine archive name
-        shell: bash
-        run: |
-          version="${{ needs.create_release.outputs.version }}"
-          echo "ARCHIVE=ariadne_$version" >> $GITHUB_ENV
+      - name: Set the directory for creating the AppImage
+        run: echo "APPIMAGE_DIR=${{ github.workspace }}/appimage_dir" >> $GITHUB_ENV
 
-      - name: Creating directory for the archive
-        shell: bash
-        run: |
-          mkdir -p "$ARCHIVE"/{bin,doc}
-          cp build/bin/ariadne "$ARCHIVE"/bin/
-          cp -a ruby "$ARCHIVE"/
-          cp README.md "$ARCHIVE"/
-          cp gpl-3.0.html "$ARCHIVE"/
-          cp doc/ariadne.adoc "$ARCHIVE"/doc/
-          cp build/doc/ariadne.1 "$ARCHIVE"/doc/
-          cp build/doc/ariadne.pdf "$ARCHIVE"/doc/
-          cp build/doc/ariadne.html "$ARCHIVE"/doc/
-          cp -a doc/images/ "$ARCHIVE"/doc/
+      - name: Create the AppRun script
+        uses: "DamianReeves/write-file-action@master"
+        with:
+          path: $APPIMAGE_DIR/AppRun
+          write-mode: overwrite
+          contents: |
+            \#! /bin/sh -e
 
-      - name: Build archive (Unix)
+            PREFIX=$APPDIR
+            export PATH=$PREFIX/gcc/10.5.0/bin:$PATH
+            export LD_LIBRARY_PATH=$PREFIX/gcc/10.5.0/lib64:$PREFIX/gcc/10.5.0/lib
+            export PATH=$PREFIX/python/3.10.12/bin:$PATH
+            export LD_LIBRARY_PATH=$PREFIX/python/3.10.12/lib:$LD_LIBRARY_PATH
+            export PATH=$PREFIX/ruby/3.3.1/bin:$PATH
+            export LD_LIBRARY_PATH=$PREFIX/ruby/3.3.1/lib:$LD_LIBRARY_PATH
+            export PATH=$PREFIX/kactus2/3.12.0:$PATH
+            export LD_LIBRARY_PATH=$PREFIX/kactus2/3.12.0:$LD_LIBRARY_PATH
+            export PYTHONHOME=$PREFIX/python/3.10.12
+
+            ariadne "$@"
+
+            # TODO Chould I set a RUBYHOME
+            # TODO Chould I set a PYTHONPATH
+
+
+
+      - name: Make the AppRun script executable
+        run: chmod +x $APPIMAGE_DIR/AppRun
+
+      - name: Create a desktop file for Ariadne
+        uses: "DamianReeves/write-file-action@master"
+        with:
+          path: $APPIMAGE_DIR/ariadne.desktop
+          write-mode: overwrite
+          contents: |
+            [Desktop Entry]
+            Name=ariadne
+            Exec=ariadne
+            Icon=ariadne
+            Type=Application
+            Categories=Utility
+
+      - name: Copy an icon to the AppImage for Ariadne
+        run: cp TODO.png $APPIMAGE_DIR/
+
+      - name: Build the AppImage of Ariadne
         shell: bash
         run: |
-          tar -czf "$ARCHIVE.tar.gz" "$ARCHIVE"
-          shasum -a 256 "$ARCHIVE.tar.gz" > "$ARCHIVE.tar.gz.sha256"
-          echo "ASSET=$ARCHIVE.tar.gz" >> $GITHUB_ENV
-          echo "ASSET_SUM=$ARCHIVE.tar.gz.sha256" >> $GITHUB_ENV
+          wget https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+          ARCH=x86_64 ./appimagetool-x86_64.AppImage $APPIMAGE_DIR
+          echo "ASSET=ariadne.AppImage" >> $GITHUB_ENV
+          echo "ASSET_SUM=ariadne.AppImage.sha256" >> $GITHUB_ENV
 
       - name: Upload release archive
         env:
@@ -107,3 +206,40 @@ jobs:
         run: |
           version="${{ needs.create_release.outputs.version }}"
           gh release upload "$version" ${{ env.ASSET }} ${{ env.ASSET_SUM }}
+
+
+      #- name: Determine archive name
+      #  shell: bash
+      #  run: |
+      #    version="${{ needs.create_release.outputs.version }}"
+      #    echo "ARCHIVE=ariadne_$version" >> $GITHUB_ENV
+
+      #- name: Creating directory for the archive
+      #  shell: bash
+      #  run: |
+      #    mkdir -p "$ARCHIVE"/{bin,doc}
+      #    cp build/bin/ariadne "$ARCHIVE"/bin/
+      #    cp -a ruby "$ARCHIVE"/
+      #    cp README.md "$ARCHIVE"/
+      #    cp gpl-3.0.html "$ARCHIVE"/
+      #    cp doc/ariadne.adoc "$ARCHIVE"/doc/
+      #    cp build/doc/ariadne.1 "$ARCHIVE"/doc/
+      #    cp build/doc/ariadne.pdf "$ARCHIVE"/doc/
+      #    cp build/doc/ariadne.html "$ARCHIVE"/doc/
+      #    cp -a doc/images/ "$ARCHIVE"/doc/
+
+      #- name: Build archive (Unix)
+      #  shell: bash
+      #  run: |
+      #    tar -czf "$ARCHIVE.tar.gz" "$ARCHIVE"
+      #    shasum -a 256 "$ARCHIVE.tar.gz" > "$ARCHIVE.tar.gz.sha256"
+      #    echo "ASSET=$ARCHIVE.tar.gz" >> $GITHUB_ENV
+      #    echo "ASSET_SUM=$ARCHIVE.tar.gz.sha256" >> $GITHUB_ENV
+
+      #- name: Upload release archive
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  shell: bash
+      #  run: |
+      #    version="${{ needs.create_release.outputs.version }}"
+      #    gh release upload "$version" ${{ env.ASSET }} ${{ env.ASSET_SUM }}
