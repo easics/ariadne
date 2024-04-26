@@ -34,7 +34,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create $RELEASE_VERSION
-                               --draft
                                --verify-tag
                                --title $RELEASE_VERSION
 
@@ -82,9 +81,9 @@ jobs:
       - name: Creating directory for the archive
         shell: bash
         run: |
-          mkdir -p "$ARCHIVE"/{bin,ruby,doc}
+          mkdir -p "$ARCHIVE"/{bin,doc}
           cp build/bin/ariadne "$ARCHIVE"/bin/
-          cp -a ruby "$ARCHIVE"/ruby/
+          cp -a ruby "$ARCHIVE"/
           cp README.md "$ARCHIVE"/
           cp gpl-3.0.html "$ARCHIVE"/
           cp doc/ariadne.adoc "$ARCHIVE"/doc/
