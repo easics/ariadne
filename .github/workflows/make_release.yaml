@@ -83,8 +83,9 @@ jobs:
       - name: Set the install directory for the packages
         shell: bash
         run: |
-          echo "PACKAGE_INSTALL_DIR=${{ github.workspace }}/package_install_dir" >> $GITHUB_ENV
-          mkdir -p $PACKAGE_INSTALL_DIR
+          package_install_dir="${{ github.workspace }}/package_install_dir"
+          mkdir -p $package_install_dir
+          echo "PACKAGE_INSTALL_DIR=$package_install_dir" >> $GITHUB_ENV
 
       - name: Install the GCC package
         shell: bash
@@ -106,8 +107,8 @@ jobs:
         shell: bash
         run: |
           # TODO the env variable must be passed along with the GITHUB variables
-          export PATH=$PACKAGE_INSTALL_DIR/gcc/10.5.0/bin:$PATH
-          export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/gcc/10.5.0/lib64:$LD_LIBRARY_PATH
+          echo "export PATH=$PACKAGE_INSTALL_DIR/gcc/10.5.0/bin:$PATH" >> $GITHUB_ENV
+          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/gcc/10.5.0/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Install the Python package
         shell: bash
@@ -124,8 +125,8 @@ jobs:
       - name: Update the PATH variable to use the new Python from now on
         shell: bash
         run: |
-          export PATH=$PACKAGE_INSTALL_DIR/python/3.10.12/bin:$PATH
-          export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/3.10.12/lib:$LD_LIBRARY_PATH
+          echo "export PATH=$PACKAGE_INSTALL_DIR/python/3.10.12/bin:$PATH" >> $GITHUB_ENV
+          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/3.10.12/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Install the Ruby package
         shell: bash
@@ -142,8 +143,8 @@ jobs:
       - name: Update the PATH variable to use the new Ruby from now on
         shell: bash
         run: |
-          export PATH=$PACKAGE_INSTALL_DIR/ruby/3.3.1/bin:$PATH
-          export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/3.3.1/lib:$LD_LIBRARY_PATH
+          echo "export PATH=$PACKAGE_INSTALL_DIR/ruby/3.3.1/bin:$PATH" >> $GITHUB_ENV
+          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/3.3.1/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       # TODO do we need to install the CMake package
       # TODO Should I add a version number after the ariadne install dir
@@ -164,8 +165,9 @@ jobs:
       - name: Set the directory for creating the AppImage
         shell: bash
         run: |
-          echo "APPIMAGE_DIR=${{ github.workspace }}/appimage_dir" >> $GITHUB_ENV
-          mkdir -p $APPIMAGE_DIR
+          appimage_dir="${{ github.workspace }}/appimage_dir"
+          mkdir -p $appimage_dir
+          echo "APPIMAGE_DIR=$appimage_dir" >> $GITHUB_ENV
 
       - name: Create the AppRun script
         uses: "DamianReeves/write-file-action@master"
