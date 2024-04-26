@@ -58,15 +58,16 @@ jobs:
         run: echo "RELEASE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - name: Show the version
-        run: echo "version isRELEASE_VERSION"
+        run: |
+          echo "version is: RELEASE_VERSION"
 
       - name: Create GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create $RELEASE_VERSION
                                --draft
                                --verify-tag
                                --title $RELEASE_VERSION
-        #env:
-        #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     outputs:
       version: ${{ env.RELEASE_VERSION }}
@@ -74,6 +75,7 @@ jobs:
 
   build_release:
     name: build_release
+    needs: ["create_release"]
     runs-on: ubuntu-latest
 
     steps:
@@ -110,8 +112,8 @@ jobs:
           echo "ASSET_SUM=$ARCHIVE.tar.gz.sha256" >> $GITHUB_ENV
 
       - name: Upload release archive
-        #env:
-        #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
           version="${{ needs.create-release.outputs.version }}"
