@@ -24,6 +24,9 @@ jobs:
                                      bison
                                      asciidoctor
 
+      - name: Install Ruby plugins
+        run: sudo gem install asciidoctor-pdf
+
       - name: Configure CMake
         run: cmake -B ${{ github.workspace }}/build
                    -S ${{ github.workspace }}
@@ -55,7 +58,7 @@ jobs:
         run: echo "RELEASE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - name: Show the version
-        run: echo "version is: $RELEASE_VERSION"
+        run: echo "version isRELEASE_VERSION"
 
       - name: Create GitHub release
         run: gh release create $RELEASE_VERSION
