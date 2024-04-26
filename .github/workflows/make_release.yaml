@@ -4,6 +4,7 @@ on: [push]
   #push:
   #  tags:
   #    - "RELEASE_V[0-9]+.[0-9]+.[0-9]+"
+  # TODO set correct
 
 jobs:
 
@@ -23,14 +24,18 @@ jobs:
           submodules: true
 
       - name: Get the release version from the tag
+        shell: bash
         run: echo "RELEASE_VERSION=RELEASE_V1.1.0" >> $GITHUB_ENV
         #run: echo "RELEASE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+        # TODO set correct
 
       - name: Show the version
+        shell: bash
         run: |
           echo "version is: $RELEASE_VERSION"
 
       - name: Create GitHub release
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create $RELEASE_VERSION
@@ -38,6 +43,7 @@ jobs:
                                --draft
                                --title $RELEASE_VERSION
                                --notes ""
+        # TODO remove the draft
 
     outputs:
       version: ${{ env.RELEASE_VERSION }}
@@ -55,6 +61,7 @@ jobs:
 
       # TODO remove code duplication
       - name: Install packages
+        shell: bash
         run: sudo apt-get install -y build-essential
                                      python3-dev
                                      ruby-dev
@@ -63,13 +70,20 @@ jobs:
                                      asciidoctor
 
       - name: Install Ruby plugins
+        shell: bash
         run: sudo gem install asciidoctor-pdf
 
       - name: Set the build directory for the packages
-        run: echo "PACKAGE_BUILD_DIR=${{ github.workspace }}/package_build_dir" >> $GITHUB_ENV
+        shell: bash
+        run: |
+          echo "PACKAGE_BUILD_DIR=${{ github.workspace }}/package_build_dir" >> $GITHUB_ENV
+          mkdir -p $PACKAGE_BUILD_DIR
 
       - name: Set the install directory for the packages
-        run: echo "PACKAGE_INSTALL_DIR=${{ github.workspace }}/package_install_dir" >> $GITHUB_ENV
+        shell: bash
+        run: |
+          echo "PACKAGE_INSTALL_DIR=${{ github.workspace }}/package_install_dir" >> $GITHUB_ENV
+          mkdir -p $PACKAGE_INSTALL_DIR
 
       - name: Install the GCC package
         shell: bash
@@ -134,6 +148,7 @@ jobs:
       # TODO Should I add a version number after the ariadne install dir
 
       - name: Configure CMake for Ariadne
+        shell: bash
         run: MY_RUBY_HOME=$PACKAGE_INSTALL_DIR/ruby/3.3.1 cmake -B $PACKAGE_BUILD_DIR/ariadne
                                                                 -S ${{ github.workspace }}
                                                                 -D SCRIPT_RUBY=ON
@@ -141,13 +156,18 @@ jobs:
                                                                 -D CMAKE_INSTALL_PREFIX=$PACKAGE_INSTALL_DIR/ariadne
 
       - name: Build Ariadne with CMake
+        shell: bash
         run: cmake --build $PACKAGE_BUILD_DIR/ariadne
                    -j 16
 
       - name: Set the directory for creating the AppImage
-        run: echo "APPIMAGE_DIR=${{ github.workspace }}/appimage_dir" >> $GITHUB_ENV
+        shell: bash
+        run: |
+          echo "APPIMAGE_DIR=${{ github.workspace }}/appimage_dir" >> $GITHUB_ENV
+          mkdir -p $APPIMAGE_DIR
 
       - name: Create the AppRun script
+        shell: bash
         uses: "DamianReeves/write-file-action@master"
         with:
           path: $APPIMAGE_DIR/AppRun
@@ -174,9 +194,11 @@ jobs:
 
 
       - name: Make the AppRun script executable
+        shell: bash
         run: chmod +x $APPIMAGE_DIR/AppRun
 
       - name: Create a desktop file for Ariadne
+        shell: bash
         uses: "DamianReeves/write-file-action@master"
         with:
           path: $APPIMAGE_DIR/ariadne.desktop
@@ -190,6 +212,7 @@ jobs:
             Categories=Utility
 
       - name: Copy an icon to the AppImage for Ariadne
+        shell: bash
         run: cp TODO.png $APPIMAGE_DIR/
 
       - name: Build the AppImage of Ariadne

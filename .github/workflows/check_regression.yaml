@@ -15,6 +15,7 @@ jobs:
           submodules: true
 
       - name: Install packages
+        shell: bash
         run: sudo apt-get install -y build-essential
                                      python3-dev
                                      ruby-dev
@@ -23,19 +24,23 @@ jobs:
                                      asciidoctor
 
       - name: Install Ruby plugins
+        shell: bash
         run: sudo gem install asciidoctor-pdf
 
       - name: Configure CMake
+        shell: bash
         run: cmake -B ${{ github.workspace }}/build
                    -S ${{ github.workspace }}
                    -D SCRIPT_RUBY=ON
                    -D SCRIPT_PYTHON=ON
 
       - name: Build with CMake
+        shell: bash
         run: cmake --build ${{ github.workspace }}/build
                    -j 16
 
       - name: Running CTest
+        shell: bash
         run: ctest --test-dir ${{ github.workspace }}/build
                    --output-on-failure
                    -j 16
