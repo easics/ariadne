@@ -82,7 +82,7 @@ jobs:
       - name: Creating directory for the archive
         shell: bash
         run: |
-          mkdir -p "$ARCHIVE"/{bin, ruby, doc}
+          mkdir -p "$ARCHIVE"/{bin,ruby,doc}
           cp build/bin/ariadne "$ARCHIVE"/bin/
           cp -a ruby "$ARCHIVE"/ruby/
           cp README.md "$ARCHIVE"/
