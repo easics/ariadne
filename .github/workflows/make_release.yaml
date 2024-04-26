@@ -55,11 +55,12 @@ jobs:
           submodules: true
 
       - name: Get the release version from the tag
-        run: echo "RELEASE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+        run: echo "RELEASE_VERSION=RELEASE_V1.1.0" >> $GITHUB_ENV
+        #run: echo "RELEASE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - name: Show the version
         run: |
-          echo "version is: RELEASE_VERSION"
+          echo "version is: $RELEASE_VERSION"
 
       - name: Create GitHub release
         env:
