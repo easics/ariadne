@@ -92,6 +92,24 @@ jobs:
           cp README.md "$ARCHIVE"/
           cp gpl-3.0.html "$ARCHIVE"/
           cp doc/ariadne.adoc "$ARCHIVE"/doc/
-          cp doc/ariadne.1 "$ARCHIVE"/doc/
+          cp build/doc/ariadne.1 "$ARCHIVE"/doc/
+          cp build/doc/ariadne.pdf "$ARCHIVE"/doc/
+          cp build/doc/ariadne.html "$ARCHIVE"/doc/
           cp -a doc/images/ "$ARCHIVE"/doc/
+          cp build/bin/ariadne "$ARCHIVE"/bin/
 
+      - name: Build archive (Unix)
+        shell: bash
+        run: |
+          tar -czf "$ARCHIVE.tar.gz" "$ARCHIVE"
+          shasum -a 256 "$ARCHIVE.tar.gz" > "$ARCHIVE.tar.gz.sha256"
+          echo "ASSET=$ARCHIVE.tar.gz" >> $GITHUB_ENV
+          echo "ASSET_SUM=$ARCHIVE.tar.gz.sha256" >> $GITHUB_ENV
+
+      - name: Upload release archive
+        #env:
+        #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          version="${{ needs.create-release.outputs.version }}"
+          gh release upload "$version" ${{ env.ASSET }} ${{ env.ASSET_SUM }}
