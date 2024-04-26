@@ -167,7 +167,6 @@ jobs:
           mkdir -p $APPIMAGE_DIR
 
       - name: Create the AppRun script
-        shell: bash
         uses: "DamianReeves/write-file-action@master"
         with:
           path: $APPIMAGE_DIR/AppRun
@@ -198,7 +197,6 @@ jobs:
         run: chmod +x $APPIMAGE_DIR/AppRun
 
       - name: Create a desktop file for Ariadne
-        shell: bash
         uses: "DamianReeves/write-file-action@master"
         with:
           path: $APPIMAGE_DIR/ariadne.desktop
