@@ -8,39 +8,7 @@ on: [push]
 jobs:
 
   build_and_test:
-    name: build_and_test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-
-      - name: Install packages
-        run: sudo apt-get install -y build-essential
-                                     python3-dev
-                                     ruby-dev
-                                     flex
-                                     bison
-                                     asciidoctor
-
-      - name: Install Ruby plugins
-        run: sudo gem install asciidoctor-pdf
-
-      - name: Configure CMake
-        run: cmake -B ${{ github.workspace }}/build
-                   -S ${{ github.workspace }}
-                   -D SCRIPT_RUBY=ON
-                   -D SCRIPT_PYTHON=ON
-
-      - name: Build with CMake
-        run: cmake --build ${{ github.workspace }}/build
-                   -j 16
-
-      - name: Running CTest
-        run: ctest --test-dir ${{ github.workspace }}/build
-                   --output-on-failure
-                   -j 16
+    uses: ./.github/workflows/check_regression.yaml
 
   # The create-release job runs purely to initialize the GitHub release itself,
   # and names the release after the `RELEASE_Vx.y.z` tag that was pushed. It's
@@ -84,10 +52,31 @@ jobs:
         with:
           submodules: true
 
+      - name: Install packages
+        run: sudo apt-get install -y build-essential
+                                     python3-dev
+                                     ruby-dev
+                                     flex
+                                     bison
+                                     asciidoctor
+
+      - name: Install Ruby plugins
+        run: sudo gem install asciidoctor-pdf
+
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build
+                   -S ${{ github.workspace }}
+                   -D SCRIPT_RUBY=ON
+                   -D SCRIPT_PYTHON=ON
+
+      - name: Build with CMake
+        run: cmake --build ${{ github.workspace }}/build
+                   -j 16
+
       - name: Determine archive name
         shell: bash
         run: |
-          version="${{ needs.create-release.outputs.version }}"
+          version="${{ needs.create_release.outputs.version }}"
           echo "ARCHIVE=ariadne_$version" >> $GITHUB_ENV
 
       - name: Creating directory for the archive
@@ -117,5 +106,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          version="${{ needs.create-release.outputs.version }}"
+          version="${{ needs.create_release.outputs.version }}"
           gh release upload "$version" ${{ env.ASSET }} ${{ env.ASSET_SUM }}

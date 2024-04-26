@@ -1,6 +1,7 @@
 name: Check that the regression passes
 
 on: [push]
+  workflow_call:
 
 jobs:
   build_and_test:
