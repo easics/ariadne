@@ -76,8 +76,9 @@ jobs:
       - name: Set the build directory for the packages
         shell: bash
         run: |
-          echo "PACKAGE_BUILD_DIR=${{ github.workspace }}/package_build_dir" >> $GITHUB_ENV
-          mkdir -p $PACKAGE_BUILD_DIR
+          package_build_dir="${{ github.workspace }}/package_build_dir"
+          mkdir -p $package_build_dir
+          echo "PACKAGE_BUILD_DIR=$package_build_dir" >> $GITHUB_ENV
 
       - name: Set the install directory for the packages
         shell: bash
