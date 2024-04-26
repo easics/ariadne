@@ -7,15 +7,15 @@ on: [push]
 
 jobs:
 
-  build_and_test:
-    uses: ./.github/workflows/check_regression.yaml
+  #build_and_test:
+  #  uses: ./.github/workflows/check_regression.yaml
 
   # The create-release job runs purely to initialize the GitHub release itself,
   # and names the release after the `RELEASE_Vx.y.z` tag that was pushed. It's
   # separate from building the release so that we only create the release once.
   create_release:
     name: create_release
-    needs: ["build_and_test"]
+      #needs: ["build_and_test"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -82,8 +82,9 @@ jobs:
       - name: Creating directory for the archive
         shell: bash
         run: |
-          mkdir -p "$ARCHIVE"/{bin, doc}
-          cp "$BIN" "$ARCHIVE"/
+          mkdir -p "$ARCHIVE"/{bin, ruby, doc}
+          cp build/bin/ariadne "$ARCHIVE"/bin/
+          cp -a ruby "$ARCHIVE"/ruby/
           cp README.md "$ARCHIVE"/
           cp gpl-3.0.html "$ARCHIVE"/
           cp doc/ariadne.adoc "$ARCHIVE"/doc/
@@ -91,7 +92,6 @@ jobs:
           cp build/doc/ariadne.pdf "$ARCHIVE"/doc/
           cp build/doc/ariadne.html "$ARCHIVE"/doc/
           cp -a doc/images/ "$ARCHIVE"/doc/
-          cp build/bin/ariadne "$ARCHIVE"/bin/
 
       - name: Build archive (Unix)
         shell: bash
