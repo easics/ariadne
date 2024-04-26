@@ -13,10 +13,22 @@
 # ariadne. If not, see <https://www.gnu.org/licenses/>.
 
 
-include(adocman.cmake)
-include(adocpdf.cmake)
-include(adochtml.cmake)
+find_program(ASCIIDOCTOR_PATH
+  NAMES asciidoctor
+  DOC "Path to asciidoctor, used to generate the HTML from the Asciidoc"
+)
 
-add_adoc_man("${CMAKE_CURRENT_SOURCE_DIR}/ariadne.adoc")
-add_adoc_pdf("${CMAKE_CURRENT_SOURCE_DIR}/ariadne.adoc")
-add_adoc_html("${CMAKE_CURRENT_SOURCE_DIR}/ariadne.adoc")
+function(add_adoc_html SRC)
+  get_filename_component(BASENAME ${SRC} NAME_WE)
+  set(DST ${BASENAME}.html)
+  string(PREPEND DST "${CMAKE_CURRENT_BINARY_DIR}/")
+  add_custom_command(
+    OUTPUT ${DST}
+    COMMAND ${ASCIIDOCTOR_PATH} ${SRC} -o ${DST}
+    DEPENDS ${SRC}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Generating HTML documentation ${BASENAME}.html"
+    VERBATIM
+  )
+  add_custom_target("html_${BASENAME}" ALL DEPENDS "${DST}")
+endfunction(add_adoc_html)
