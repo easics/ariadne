@@ -1,0 +1,36 @@
+name: Check that the regression passes
+
+on: [push]
+
+jobs:
+  build_and_test:
+    name: build_and_test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install packages
+        run: sudo apt-get install -y build-essential
+                                     python3-dev
+                                     ruby-dev
+                                     flex
+                                     bison
+                                     asciidoctor
+
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build
+                   -S ${{ github.workspace }}
+                   -D SCRIPT_RUBY=ON
+                   -D SCRIPT_PYTHON=ON
+
+      - name: Build with CMake
+        run: cmake --build ${{ github.workspace }}/build
+                   -j 16
+
+      - name: Running CTest
+        run: ctest --test-dir ${{ github.workspace }}/build
+                   --output-on-failure
+                   -j 16

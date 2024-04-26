@@ -1,35 +1,97 @@
 name: Make release
 
 on: [push]
+  #push:
+  #  tags:
+  #    - "RELEASE_V[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
-  build:
+
+  build_and_test:
+    name: build_and_test
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
 
-    - name: Install packages
-      run: sudo apt-get install -y build-essential
-                                   python3-dev
-                                   ruby-dev
-                                   flex
-                                   bison
-                                   asciidoctor
+      - name: Install packages
+        run: sudo apt-get install -y build-essential
+                                     python3-dev
+                                     ruby-dev
+                                     flex
+                                     bison
+                                     asciidoctor
 
-    - name: Configure CMake
-      run: cmake -B ${{ github.workspace }}/build
-                 -S ${{ github.workspace }}
-                 -D SCRIPT_RUBY=ON
-                 -D SCRIPT_PYTHON=ON
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build
+                   -S ${{ github.workspace }}
+                   -D SCRIPT_RUBY=ON
+                   -D SCRIPT_PYTHON=ON
 
-    - name: Build with CMake
-      run: cmake --build ${{ github.workspace }}/build
-                 -j 16
+      - name: Build with CMake
+        run: cmake --build ${{ github.workspace }}/build
+                   -j 16
 
-    - name: Running CTest
-      run: ctest --test-dir ${{ github.workspace }}/build
-                 --output-on-failure
-                 -j 16
+      - name: Running CTest
+        run: ctest --test-dir ${{ github.workspace }}/build
+                   --output-on-failure
+                   -j 16
+
+  # The create-release job runs purely to initialize the GitHub release itself,
+  # and names the release after the `RELEASE_Vx.y.z` tag that was pushed. It's
+  # separate from building the release so that we only create the release once.
+  create_release:
+    name: create_release
+    needs: ["build_and_test"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Get the release version from the tag
+        run: echo "RELEASE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Show the version
+        run: echo "version is: $RELEASE_VERSION"
+
+      - name: Create GitHub release
+        run: gh release create $RELEASE_VERSION
+                               --draft
+                               --verify-tag
+                               --title $RELEASE_VERSION
+        #env:
+        #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    outputs:
+      version: ${{ env.RELEASE_VERSION }}
+
+
+  build_release:
+    name: build_release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Determine archive name
+        shell: bash
+        run: |
+          version="${{ needs.create-release.outputs.version }}"
+          echo "ARCHIVE=ariadne_$version" >> $GITHUB_ENV
+
+      - name: Creating directory for the archive
+        shell: bash
+        run: |
+          mkdir -p "$ARCHIVE"/{bin, doc}
+          cp "$BIN" "$ARCHIVE"/
+          cp README.md "$ARCHIVE"/
+          cp gpl-3.0.html "$ARCHIVE"/
+          cp doc/ariadne.adoc "$ARCHIVE"/doc/
+          cp doc/ariadne.1 "$ARCHIVE"/doc/
+          cp -a doc/images/ "$ARCHIVE"/doc/
+
