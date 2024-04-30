@@ -121,7 +121,7 @@ jobs:
         shell: bash
         run: |
           echo "export PATH=$PACKAGE_INSTALL_DIR/ruby/3.3.1/bin:$PATH" >> $GITHUB_ENV
-          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/3.3.1/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/ruby/3.3.1/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Configure CMake for Ariadne
         shell: bash
@@ -149,6 +149,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p $APPIMAGE_DIR/gcc/lib64
+          echo "$(objdump -p $PACKAGE_INSTALL_DIR/ariadne)"
           lib_file_path=$(gcc -print-file-name=libgcc_s.so)
           cp -a $lib_file_path $APPIMAGE_DIR/gcc/lib64
           lib_file_path=$(gcc -print-file-name=libgcc_s.so.1)
