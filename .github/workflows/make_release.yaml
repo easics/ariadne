@@ -71,7 +71,7 @@ jobs:
 
       - name: Install Ruby plugins
         shell: bash
-        run: sudo apt install ruby-asciidoctor-pdf
+        run: sudo apt-get install -y ruby-asciidoctor-pdf
 
       - name: Set the build directory for the packages
         shell: bash
