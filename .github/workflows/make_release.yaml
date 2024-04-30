@@ -113,7 +113,7 @@ jobs:
           tar -zxf ruby-3.3.1.tar.gz
           mkdir ruby-3.3.1.build
           cd ruby-3.3.1.build
-          ../ruby-3.3.1/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/3.3.1
+          ../ruby-3.3.1/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/3.3.1 --enable-shared
           make -j16
           make install
 
