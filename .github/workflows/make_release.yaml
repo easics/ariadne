@@ -71,7 +71,7 @@ jobs:
 
       - name: Install Ruby plugins
         shell: bash
-        run: apt install ruby-asciidoctor-pdf
+        run: sudo apt install ruby-asciidoctor-pdf
 
       - name: Set the build directory for the packages
         shell: bash
@@ -87,34 +87,11 @@ jobs:
           mkdir -p $package_install_dir
           echo "PACKAGE_INSTALL_DIR=$package_install_dir" >> $GITHUB_ENV
 
-      - name: Install the GCC package
-        shell: bash
-        run: |
-          cd $PACKAGE_BUILD_DIR
-          # TODO which GCC version
-          wget https://ftp.gwdg.de/pub/misc/gcc/releases/gcc-10.5.0/gcc-10.5.0.tar.xz
-          tar xf gcc-10.5.0.tar.xz
-          cd gcc-10.5.0
-          contrib/download_prerequisites
-          cd ..
-          mkdir gcc-10.5.0.build
-          cd gcc-10.5.0.build
-          ../gcc-10.5.0/configure --prefix=$PACKAGE_INSTALL_DIR/gcc/10.5.0 --enable-languages=c,c++ --enable-threads --disable-multilib
-          make -j16
-          make install
-
-      - name: Update the PATH variable to use the new GCC from now on
-        shell: bash
-        run: |
-          # TODO the env variable must be passed along with the GITHUB variables
-          echo "export PATH=$PACKAGE_INSTALL_DIR/gcc/10.5.0/bin:$PATH" >> $GITHUB_ENV
-          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/gcc/10.5.0/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-
       - name: Install the Python package
         shell: bash
         run: |
           cd $PACKAGE_BUILD_DIR
-          wget https://www.python.org/ftp/python/3.8.17/Python-3.10.12.tgz
+          wget https://www.python.org/ftp/python/3.10.12/Python-3.10.12.tgz
           tar -zxf Python-3.10.12.tgz
           mkdir Python-3.10.12.build
           cd Python-3.10.12.build
@@ -146,8 +123,8 @@ jobs:
           echo "export PATH=$PACKAGE_INSTALL_DIR/ruby/3.3.1/bin:$PATH" >> $GITHUB_ENV
           echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/3.3.1/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
-      # TODO do we need to install the CMake package
       # TODO Should I add a version number after the ariadne install dir
+      # TODO pass the MY_Python_home variable
 
       - name: Configure CMake for Ariadne
         shell: bash
@@ -169,6 +146,12 @@ jobs:
           mkdir -p $appimage_dir
           echo "APPIMAGE_DIR=$appimage_dir" >> $GITHUB_ENV
 
+      - name: Copy the necessary GCC libs
+        shell: bash
+        run: |
+          mkdir -p $IMAGE/gcc/lib64
+          cp -a $IMAGE/gcc/lib64/{libgcc_s.so,libgcc_s.so.1,libstdc++.so,libstdc++.so.6,libstdc++.so.6.0.28} $IMAGE/gcc/lib64
+
       - name: Create the AppRun script
         uses: "DamianReeves/write-file-action@master"
         with:
@@ -178,8 +161,7 @@ jobs:
             \#! /bin/sh -e
 
             PREFIX=$APPDIR
-            export PATH=$PREFIX/gcc/10.5.0/bin:$PATH
-            export LD_LIBRARY_PATH=$PREFIX/gcc/10.5.0/lib64:$PREFIX/gcc/10.5.0/lib
+            export LD_LIBRARY_PATH=$PREFIX/gcc/lib64
             export PATH=$PREFIX/python/3.10.12/bin:$PATH
             export LD_LIBRARY_PATH=$PREFIX/python/3.10.12/lib:$LD_LIBRARY_PATH
             export PATH=$PREFIX/ruby/3.3.1/bin:$PATH
