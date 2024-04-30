@@ -123,16 +123,15 @@ jobs:
           echo "export PATH=$PACKAGE_INSTALL_DIR/ruby/3.3.1/bin:$PATH" >> $GITHUB_ENV
           echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/3.3.1/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
-      # TODO Should I add a version number after the ariadne install dir
-      # TODO pass the MY_Python_home variable
-
       - name: Configure CMake for Ariadne
         shell: bash
-        run: MY_RUBY_HOME=$PACKAGE_INSTALL_DIR/ruby/3.3.1 cmake -B $PACKAGE_BUILD_DIR/ariadne
-                                                                -S ${{ github.workspace }}
-                                                                -D SCRIPT_RUBY=ON
-                                                                -D SCRIPT_PYTHON=ON
-                                                                -D CMAKE_INSTALL_PREFIX=$PACKAGE_INSTALL_DIR/ariadne
+        run: MY_RUBY_HOME=$PACKAGE_INSTALL_DIR/ruby/3.3.1
+             Python3_ROOT_DIR=$PACKAGE_INSTALL_DIR/python/3.10.12
+             cmake -B $PACKAGE_BUILD_DIR/ariadne
+                   -S ${{ github.workspace }}
+                   -D SCRIPT_RUBY=ON
+                   -D SCRIPT_PYTHON=ON
+                   -D CMAKE_INSTALL_PREFIX=$PACKAGE_INSTALL_DIR/ariadne
 
       - name: Build Ariadne with CMake
         shell: bash
@@ -149,8 +148,8 @@ jobs:
       - name: Copy the necessary GCC libs
         shell: bash
         run: |
-          mkdir -p $IMAGE/gcc/lib64
-          cp -a $IMAGE/gcc/lib64/{libgcc_s.so,libgcc_s.so.1,libstdc++.so,libstdc++.so.6,libstdc++.so.6.0.28} $IMAGE/gcc/lib64
+          mkdir -p $APPIMAGE_DIR/gcc/lib64
+          cp -a $APPIMAGE_DIR/gcc/lib64/{libgcc_s.so,libgcc_s.so.1,libstdc++.so,libstdc++.so.6,libstdc++.so.6.0.28} $APPIMAGE_DIR/gcc/lib64
 
       - name: Create the AppRun script
         uses: "DamianReeves/write-file-action@master"
@@ -166,16 +165,12 @@ jobs:
             export LD_LIBRARY_PATH=$PREFIX/python/3.10.12/lib:$LD_LIBRARY_PATH
             export PATH=$PREFIX/ruby/3.3.1/bin:$PATH
             export LD_LIBRARY_PATH=$PREFIX/ruby/3.3.1/lib:$LD_LIBRARY_PATH
-            export PATH=$PREFIX/kactus2/3.12.0:$PATH
-            export LD_LIBRARY_PATH=$PREFIX/kactus2/3.12.0:$LD_LIBRARY_PATH
+            export PATH=$PREFIX/ariadne:$PATH
             export PYTHONHOME=$PREFIX/python/3.10.12
 
             ariadne "$@"
 
             # TODO Chould I set a RUBYHOME
-            # TODO Chould I set a PYTHONPATH
-
-
 
       - name: Make the AppRun script executable
         shell: bash
