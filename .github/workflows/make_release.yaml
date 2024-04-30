@@ -149,7 +149,16 @@ jobs:
         shell: bash
         run: |
           mkdir -p $APPIMAGE_DIR/gcc/lib64
-          cp -a $APPIMAGE_DIR/gcc/lib64/{libgcc_s.so,libgcc_s.so.1,libstdc++.so,libstdc++.so.6,libstdc++.so.6.0.28} $APPIMAGE_DIR/gcc/lib64
+          lib_file_path=$(gcc -print-file-name=libgcc_s.so)
+          cp -a $lib_file_path $APPIMAGE_DIR/gcc/lib64
+          lib_file_path=$(gcc -print-file-name=libgcc_s.so.1)
+          cp -a $lib_file_path $APPIMAGE_DIR/gcc/lib64
+          lib_file_path=$(gcc -print-file-name=libstdc++.so)
+          cp -a $lib_file_path $APPIMAGE_DIR/gcc/lib64
+          lib_file_path=$(gcc -print-file-name=libstdc++.so.6)
+          cp -a $lib_file_path $APPIMAGE_DIR/gcc/lib64
+          lib_file_path=$(gcc -print-file-name=libstdc++.so.6.0.28)
+          cp -a $lib_file_path $APPIMAGE_DIR/gcc/lib64
 
       - name: Create the AppRun script
         uses: "DamianReeves/write-file-action@master"
