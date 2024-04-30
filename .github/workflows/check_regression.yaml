@@ -25,7 +25,7 @@ jobs:
 
       - name: Install Ruby plugins
         shell: bash
-        run: sudo gem install asciidoctor-pdf
+        run: apt install ruby-asciidoctor-pdf
 
       - name: Configure CMake
         shell: bash

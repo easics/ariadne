@@ -71,7 +71,7 @@ jobs:
 
       - name: Install Ruby plugins
         shell: bash
-        run: sudo gem install asciidoctor-pdf
+        run: apt install ruby-asciidoctor-pdf
 
       - name: Set the build directory for the packages
         shell: bash
@@ -99,7 +99,7 @@ jobs:
           cd ..
           mkdir gcc-10.5.0.build
           cd gcc-10.5.0.build
-          ../gcc-10.5.0/configure --prefix=$PACKAGE_INSTALL_DIR/gcc/10.5.0 --enable-languages=c,c++ --enable-threads
+          ../gcc-10.5.0/configure --prefix=$PACKAGE_INSTALL_DIR/gcc/10.5.0 --enable-languages=c,c++ --enable-threads --disable-multilib
           make -j16
           make install
 
