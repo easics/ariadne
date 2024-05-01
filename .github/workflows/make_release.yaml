@@ -163,16 +163,17 @@ jobs:
         run: |
           touch $APPIMAGE_DIR/AppRun
           echo "#! /bin/sh -e
-                PREFIX=$APPDIR
-                export LD_LIBRARY_PATH=$PREFIX/gcc/lib64
-                export PATH=$PREFIX/python/3.10.12/bin:$PATH
-                export LD_LIBRARY_PATH=$PREFIX/python/3.10.12/lib:$LD_LIBRARY_PATH
-                export PATH=$PREFIX/ruby/3.3.1/bin:$PATH
-                export LD_LIBRARY_PATH=$PREFIX/ruby/3.3.1/lib:$LD_LIBRARY_PATH
-                export PATH=$PREFIX/ariadne:$PATH
-                export PYTHONHOME=$PREFIX/python/3.10.12
 
-                ariadne \"$@\"" > $APPIMAGE_DIR/AppRun
+          PREFIX=\$APPDIR
+          export LD_LIBRARY_PATH=\$PREFIX/gcc/lib64
+          export PATH=\$PREFIX/python/3.10.12/bin:\$PATH
+          export LD_LIBRARY_PATH=\$PREFIX/python/3.10.12/lib:\$LD_LIBRARY_PATH
+          export PATH=\$PREFIX/ruby/3.3.1/bin:\$PATH
+          export LD_LIBRARY_PATH=\$PREFIX/ruby/3.3.1/lib:\$LD_LIBRARY_PATH
+          export PATH=\$PREFIX/ariadne:\$PATH
+          export PYTHONHOME=\$PREFIX/python/3.10.12
+
+          ariadne \"\$@\"" > $APPIMAGE_DIR/AppRun
 
 
             # TODO Chould I set a RUBYHOME
@@ -190,15 +191,15 @@ jobs:
         run: |
           touch $APPIMAGE_DIR/ariadne.desktop
           echo "[Desktop Entry]
-                Name=ariadne
-                Exec=ariadne
-                Icon=ariadne
-                Type=Application
-                Categories=Utility" > $APPIMAGE_DIR/ariadne.desktop
+          Name=ariadne
+          Exec=ariadne
+          Icon=ariadne
+          Type=Application
+          Categories=Utility" > $APPIMAGE_DIR/ariadne.desktop
 
-      - name: Copy an icon to the AppImage for Ariadne
-        shell: bash
-        run: cp TODO.png $APPIMAGE_DIR/
+      #- name: Copy an icon to the AppImage for Ariadne
+      #  shell: bash
+      #  run: cp TODO.png $APPIMAGE_DIR/
 
       - name: Build the AppImage of Ariadne
         shell: bash
