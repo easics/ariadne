@@ -159,42 +159,42 @@ jobs:
           cp -a ${lib_file_path}* $APPIMAGE_DIR/gcc/lib64
 
       - name: Create the AppRun script
-        uses: "DamianReeves/write-file-action@master"
-        with:
-          path: $APPIMAGE_DIR/AppRun
-          write-mode: overwrite
-          contents: |
-            \#! /bin/sh -e
+        shell: bash
+        run: |
+          touch $APPIMAGE_DIR/AppRun
+          echo "#! /bin/sh -e
+                PREFIX=$APPDIR
+                export LD_LIBRARY_PATH=$PREFIX/gcc/lib64
+                export PATH=$PREFIX/python/3.10.12/bin:$PATH
+                export LD_LIBRARY_PATH=$PREFIX/python/3.10.12/lib:$LD_LIBRARY_PATH
+                export PATH=$PREFIX/ruby/3.3.1/bin:$PATH
+                export LD_LIBRARY_PATH=$PREFIX/ruby/3.3.1/lib:$LD_LIBRARY_PATH
+                export PATH=$PREFIX/ariadne:$PATH
+                export PYTHONHOME=$PREFIX/python/3.10.12
 
-            PREFIX=$APPDIR
-            export LD_LIBRARY_PATH=$PREFIX/gcc/lib64
-            export PATH=$PREFIX/python/3.10.12/bin:$PATH
-            export LD_LIBRARY_PATH=$PREFIX/python/3.10.12/lib:$LD_LIBRARY_PATH
-            export PATH=$PREFIX/ruby/3.3.1/bin:$PATH
-            export LD_LIBRARY_PATH=$PREFIX/ruby/3.3.1/lib:$LD_LIBRARY_PATH
-            export PATH=$PREFIX/ariadne:$PATH
-            export PYTHONHOME=$PREFIX/python/3.10.12
+                ariadne \"$@\"" > $APPIMAGE_DIR/AppRun
 
-            ariadne "$@"
 
             # TODO Chould I set a RUBYHOME
+
+      - name: test
+        shell: bash
+        run: cat $APPIMAGE_DIR/AppRun
 
       - name: Make the AppRun script executable
         shell: bash
         run: chmod +x $APPIMAGE_DIR/AppRun
 
       - name: Create a desktop file for Ariadne
-        uses: "DamianReeves/write-file-action@master"
-        with:
-          path: $APPIMAGE_DIR/ariadne.desktop
-          write-mode: overwrite
-          contents: |
-            [Desktop Entry]
-            Name=ariadne
-            Exec=ariadne
-            Icon=ariadne
-            Type=Application
-            Categories=Utility
+        shell: bash
+        run: |
+          touch $APPIMAGE_DIR/ariadne.desktop
+          echo "[Desktop Entry]
+                Name=ariadne
+                Exec=ariadne
+                Icon=ariadne
+                Type=Application
+                Categories=Utility" > $APPIMAGE_DIR/ariadne.desktop
 
       - name: Copy an icon to the AppImage for Ariadne
         shell: bash
