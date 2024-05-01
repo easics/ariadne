@@ -39,6 +39,10 @@ jobs:
         run: cmake --build ${{ github.workspace }}/build
                    -j 16
 
+      - name: test
+        shell: bash
+        run: echo "$(objdump -p ${{ github.workspace }}/build/bin/ariadne)"
+
       - name: Running CTest
         shell: bash
         run: ctest --test-dir ${{ github.workspace }}/build

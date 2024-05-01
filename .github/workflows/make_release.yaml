@@ -149,7 +149,6 @@ jobs:
         shell: bash
         run: |
           mkdir -p $APPIMAGE_DIR/gcc/lib64
-          echo "$(objdump -p $PACKAGE_INSTALL_DIR/ariadne)"
           lib_file_path=$(gcc -print-file-name=libgcc_s.so)
           cp -a $lib_file_path $APPIMAGE_DIR/gcc/lib64
           lib_file_path=$(gcc -print-file-name=libgcc_s.so.1)
