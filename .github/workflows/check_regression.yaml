@@ -41,7 +41,9 @@ jobs:
 
       - name: test
         shell: bash
-        run: echo "$(objdump -p ${{ github.workspace }}/build/bin/ariadne)"
+        run: |
+          echo "$(objdump -p ${{ github.workspace }}/build/bin/ariadne)"
+          echo "$(ldd ${{ github.workspace }}/build/bin/ariadne)"
 
       - name: Running CTest
         shell: bash
