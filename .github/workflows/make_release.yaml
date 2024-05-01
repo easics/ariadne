@@ -212,7 +212,7 @@ jobs:
           wget https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
           chmod +x appimagetool-x86_64.AppImage
           ARCH=x86_64 ./appimagetool-x86_64.AppImage $APPIMAGE_DIR
-          echo "ARIADNE_APPIMAGE=ariadne.AppImage" >> $GITHUB_ENV
+          echo "ARIADNE_APPIMAGE=ariadne-x86_64.AppImage" >> $GITHUB_ENV
 
       - name: Determine archive name
         shell: bash
