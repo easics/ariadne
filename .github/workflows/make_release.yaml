@@ -60,7 +60,7 @@ jobs:
           submodules: true
 
       # TODO remove code duplication
-      - name: Install packages
+      - name: Install packages for building Ariadne
         shell: bash
         run: sudo apt-get install -y build-essential
                                      python3-dev
@@ -201,14 +201,47 @@ jobs:
       #  shell: bash
       #  run: cp TODO.png $APPIMAGE_DIR/
 
+
+      - name: Install packages for creating the AppImage
+        shell: bash
+        run: sudo apt-get install -y fuse
+                                     libfuse2
+
       - name: Build the AppImage of Ariadne
         shell: bash
         run: |
           wget https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
           chmod +x appimagetool-x86_64.AppImage
           ARCH=x86_64 ./appimagetool-x86_64.AppImage $APPIMAGE_DIR
-          echo "ASSET=ariadne.AppImage" >> $GITHUB_ENV
-          echo "ASSET_SUM=ariadne.AppImage.sha256" >> $GITHUB_ENV
+          echo "ARIADNE_APPIMAGE=ariadne.AppImage" >> $GITHUB_ENV
+
+      - name: Determine archive name
+        shell: bash
+        run: |
+          version="${{ needs.create_release.outputs.version }}"
+          echo "ARCHIVE=ariadne_$version" >> $GITHUB_ENV
+
+      - name: Creating directory for the archive
+        shell: bash
+        run: |
+          mkdir -p "$ARCHIVE"/{bin,doc}
+          cp $ARIADNE_APPIMAGE "$ARCHIVE"/bin/
+          cp -a ruby "$ARCHIVE"/
+          cp README.md "$ARCHIVE"/
+          cp gpl-3.0.html "$ARCHIVE"/
+          cp doc/ariadne.adoc "$ARCHIVE"/doc/
+          cp build/doc/ariadne.1 "$ARCHIVE"/doc/
+          cp build/doc/ariadne.pdf "$ARCHIVE"/doc/
+          cp build/doc/ariadne.html "$ARCHIVE"/doc/
+          cp -a doc/images/ "$ARCHIVE"/doc/
+
+      - name: Build archive (Unix)
+        shell: bash
+        run: |
+          tar -czf "$ARCHIVE.tar.gz" "$ARCHIVE"
+          shasum -a 256 "$ARCHIVE.tar.gz" > "$ARCHIVE.tar.gz.sha256"
+          echo "ASSET=$ARCHIVE.tar.gz" >> $GITHUB_ENV
+          echo "ASSET_SUM=$ARCHIVE.tar.gz.sha256" >> $GITHUB_ENV
 
       - name: Upload release archive
         env:
