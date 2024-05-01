@@ -175,12 +175,7 @@ jobs:
 
           ariadne \"\$@\"" > $APPIMAGE_DIR/AppRun
 
-
-            # TODO Chould I set a RUBYHOME
-
-      - name: test
-        shell: bash
-        run: cat $APPIMAGE_DIR/AppRun
+          # TODO Chould I set a RUBYHOME
 
       - name: Make the AppRun script executable
         shell: bash
@@ -229,9 +224,9 @@ jobs:
           cp README.md "$ARCHIVE"/
           cp gpl-3.0.html "$ARCHIVE"/
           cp doc/ariadne.adoc "$ARCHIVE"/doc/
-          cp build/doc/ariadne.1 "$ARCHIVE"/doc/
-          cp build/doc/ariadne.pdf "$ARCHIVE"/doc/
-          cp build/doc/ariadne.html "$ARCHIVE"/doc/
+          cp $PACKAGE_BUILD_DIR/ariadne/doc/ariadne.1 "$ARCHIVE"/doc/
+          cp $PACKAGE_BUILD_DIR/ariadne/doc/ariadne.pdf "$ARCHIVE"/doc/
+          cp $PACKAGE_BUILD_DIR/ariadne/doc/ariadne.html "$ARCHIVE"/doc/
           cp -a doc/images/ "$ARCHIVE"/doc/
 
       - name: Build archive (Unix)
