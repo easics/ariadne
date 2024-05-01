@@ -138,6 +138,10 @@ jobs:
         run: cmake --build $PACKAGE_BUILD_DIR/ariadne
                    -j 16
 
+      - name: test
+        shell: bash
+        run: ls $PACKAGE_INSTALL_DIR/ariadne
+
       - name: Set the directory for creating the AppImage
         shell: bash
         run: |
