@@ -193,14 +193,13 @@ jobs:
           echo "[Desktop Entry]
           Name=ariadne
           Exec=ariadne
-          Icon=ariadne
+          Icon=ariadne_icon
           Type=Application
           Categories=Utility" > $APPIMAGE_DIR/ariadne.desktop
 
-      #- name: Copy an icon to the AppImage for Ariadne
-      #  shell: bash
-      #  run: cp TODO.png $APPIMAGE_DIR/
-
+      - name: Copy an icon to the AppImage for Ariadne
+        shell: bash
+        run: cp doc/images/ariadne_icon.png $APPIMAGE_DIR/
 
       - name: Install packages for creating the AppImage
         shell: bash
