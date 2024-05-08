@@ -75,46 +75,56 @@ jobs:
           mkdir -p $package_install_dir
           echo "PACKAGE_INSTALL_DIR=$package_install_dir" >> $GITHUB_ENV
 
+      - name: Set the version number for Python
+        shell: bash
+        run: echo "PYTHON_VERSION=3.10.12" >> $GITHUB_ENV
+
       - name: Install the Python package
         shell: bash
         run: |
           cd $PACKAGE_BUILD_DIR
-          wget https://www.python.org/ftp/python/3.10.12/Python-3.10.12.tgz
-          tar -zxf Python-3.10.12.tgz
-          mkdir Python-3.10.12.build
-          cd Python-3.10.12.build
-          ../Python-3.10.12/configure --prefix=$PACKAGE_INSTALL_DIR/python/3.10.12 --enable-shared --enable-optimizations
+          wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
+          tar -zxf Python-$PYTHON_VERSION.tgz
+          mkdir Python-$PYTHON_VERSION.build
+          cd Python-$PYTHON_VERSION.build
+          ../Python-$PYTHON_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION --enable-shared --enable-optimizations
           make -j16
           make install
 
       - name: Update the PATH variable to use the new Python from now on
         shell: bash
         run: |
-          echo "export PATH=$PACKAGE_INSTALL_DIR/python/3.10.12/bin:$PATH" >> $GITHUB_ENV
-          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/3.10.12/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "export PATH=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin:$PATH" >> $GITHUB_ENV
+          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
+      - name: Set the version number for Ruby
+        shell: bash
+        run: |
+          echo "RUBY_VERSION=3.0.2" >> $GITHUB_ENV
+          echo "RUBY_VERSION_SHORT=3.0" >> $GITHUB_ENV
 
       - name: Install the Ruby package
         shell: bash
         run: |
           cd $PACKAGE_BUILD_DIR
-          wget https://cache.ruby-lang.org/pub/ruby/3.0/ruby-3.0.2.tar.gz
-          tar -zxf ruby-3.0.2.tar.gz
-          mkdir ruby-3.0.2.build
-          cd ruby-3.0.2.build
-          ../ruby-3.0.2/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/3.0.2 --enable-shared
+          wget https://cache.ruby-lang.org/pub/ruby/$RUBY_VERSION_SHORT/ruby-$RUBY_VERSION.tar.gz
+          tar -zxf ruby-$RUBY_VERSION.tar.gz
+          mkdir ruby-$RUBY_VERSION.build
+          cd ruby-$RUBY_VERSION.build
+          ../ruby-$RUBY_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION --enable-shared
           make -j16
           make install
 
       - name: Update the PATH variable to use the new Ruby from now on
         shell: bash
         run: |
-          echo "export PATH=$PACKAGE_INSTALL_DIR/ruby/3.0.2/bin:$PATH" >> $GITHUB_ENV
-          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/ruby/3.0.2/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "export PATH=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION/bin:$PATH" >> $GITHUB_ENV
+          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Configure CMake for Ariadne
         shell: bash
-        run: MY_RUBY_HOME=$PACKAGE_INSTALL_DIR/ruby/3.0.2
-             Python_ROOT_DIR=$PACKAGE_INSTALL_DIR/python/3.10.12
+        run: MY_RUBY_HOME=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION
+             Python_ROOT_DIR=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION
              cmake -B $PACKAGE_BUILD_DIR/ariadne
                    -S ${{ github.workspace }}
                    -D SCRIPT_RUBY=ON
@@ -176,16 +186,14 @@ jobs:
 
           PREFIX=\$APPDIR
           export LD_LIBRARY_PATH=\$PREFIX/gcc/lib64
-          export PATH=\$PREFIX/python/3.10.12/bin:\$PATH
-          export LD_LIBRARY_PATH=\$PREFIX/python/3.10.12/lib:\$LD_LIBRARY_PATH
-          export PATH=\$PREFIX/ruby/3.0.2/bin:\$PATH
-          export LD_LIBRARY_PATH=\$PREFIX/ruby/3.0.2/lib:\$LD_LIBRARY_PATH
+          export PATH=\$PREFIX/python/$PYTHON_VERSION/bin:\$PATH
+          export LD_LIBRARY_PATH=\$PREFIX/python/$PYTHON_VERSION/lib:\$LD_LIBRARY_PATH
+          export PATH=\$PREFIX/ruby/$RUBY_VERSION/bin:\$PATH
+          export LD_LIBRARY_PATH=\$PREFIX/ruby/$RUBY_VERSION/lib:\$LD_LIBRARY_PATH
           export PATH=\$PREFIX/ariadne/$ARIADNE_VERSION/bin:\$PATH
-          export PYTHONHOME=\$PREFIX/python/3.10.12
+          export PYTHONHOME=\$PREFIX/python/$PYTHON_VERSION
 
           ariadne \"\$@\"" > $APPIMAGE_DIR/AppRun
-
-          # TODO Chould I set a RUBYHOME
 
       - name: Make the AppRun script executable
         shell: bash
@@ -254,40 +262,3 @@ jobs:
         run: |
           version="${{ needs.create_release.outputs.version }}"
           gh release upload "$version" ${{ env.ASSET }} ${{ env.ASSET_SUM }}
-
-
-      #- name: Determine archive name
-      #  shell: bash
-      #  run: |
-      #    version="${{ needs.create_release.outputs.version }}"
-      #    echo "ARCHIVE=ariadne_$version" >> $GITHUB_ENV
-
-      #- name: Creating directory for the archive
-      #  shell: bash
-      #  run: |
-      #    mkdir -p "$ARCHIVE"/{bin,doc}
-      #    cp build/bin/ariadne "$ARCHIVE"/bin/
-      #    cp -a ruby "$ARCHIVE"/
-      #    cp README.md "$ARCHIVE"/
-      #    cp gpl-3.0.html "$ARCHIVE"/
-      #    cp doc/ariadne.adoc "$ARCHIVE"/doc/
-      #    cp build/doc/ariadne.1 "$ARCHIVE"/doc/
-      #    cp build/doc/ariadne.pdf "$ARCHIVE"/doc/
-      #    cp build/doc/ariadne.html "$ARCHIVE"/doc/
-      #    cp -a doc/images/ "$ARCHIVE"/doc/
-
-      #- name: Build archive (Unix)
-      #  shell: bash
-      #  run: |
-      #    tar -czf "$ARCHIVE.tar.gz" "$ARCHIVE"
-      #    shasum -a 256 "$ARCHIVE.tar.gz" > "$ARCHIVE.tar.gz.sha256"
-      #    echo "ASSET=$ARCHIVE.tar.gz" >> $GITHUB_ENV
-      #    echo "ASSET_SUM=$ARCHIVE.tar.gz.sha256" >> $GITHUB_ENV
-
-      #- name: Upload release archive
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #  shell: bash
-      #  run: |
-      #    version="${{ needs.create_release.outputs.version }}"
-      #    gh release upload "$version" ${{ env.ASSET }} ${{ env.ASSET_SUM }}
