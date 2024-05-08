@@ -1,5 +1,4 @@
-name: check_regression
-description: Check that the regression passes
+name: Check that the regression passes
 
 on:
   push:

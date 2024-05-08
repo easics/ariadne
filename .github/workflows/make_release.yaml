@@ -1,5 +1,4 @@
-name: Make release
-description: Make an AppImage release of Ariadne
+name: Make an AppImage release of Ariadne
 
 on: [push]
   #push:
