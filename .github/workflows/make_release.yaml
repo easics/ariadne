@@ -138,9 +138,9 @@ jobs:
         run: cmake --build $PACKAGE_BUILD_DIR/ariadne
                    -j 16
 
-      - name: test
+      - name: Install Ariadne with CMake
         shell: bash
-        run: ls $PACKAGE_INSTALL_DIR/ariadne
+        run: cmake --install $PACKAGE_BUILD_DIR/ariadne
 
       - name: Set the directory for creating the AppImage
         shell: bash
