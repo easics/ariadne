@@ -97,23 +97,23 @@ jobs:
         shell: bash
         run: |
           cd $PACKAGE_BUILD_DIR
-          wget https://cache.ruby-lang.org/pub/ruby/3.0/ruby-3.0.7.tar.gz
-          tar -zxf ruby-3.0.7.tar.gz
-          mkdir ruby-3.0.7.build
-          cd ruby-3.0.7.build
-          ../ruby-3.0.7/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/3.0.7 --enable-shared
+          wget https://cache.ruby-lang.org/pub/ruby/3.0/ruby-3.0.2.tar.gz
+          tar -zxf ruby-3.0.2.tar.gz
+          mkdir ruby-3.0.2.build
+          cd ruby-3.0.2.build
+          ../ruby-3.0.2/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/3.0.2 --enable-shared
           make -j16
           make install
 
       - name: Update the PATH variable to use the new Ruby from now on
         shell: bash
         run: |
-          echo "export PATH=$PACKAGE_INSTALL_DIR/ruby/3.0.7/bin:$PATH" >> $GITHUB_ENV
-          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/ruby/3.0.7/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "export PATH=$PACKAGE_INSTALL_DIR/ruby/3.0.2/bin:$PATH" >> $GITHUB_ENV
+          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/ruby/3.0.2/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Configure CMake for Ariadne
         shell: bash
-        run: MY_RUBY_HOME=$PACKAGE_INSTALL_DIR/ruby/3.0.7
+        run: MY_RUBY_HOME=$PACKAGE_INSTALL_DIR/ruby/3.0.2
              Python_ROOT_DIR=$PACKAGE_INSTALL_DIR/python/3.10.12
              cmake -B $PACKAGE_BUILD_DIR/ariadne
                    -S ${{ github.workspace }}
@@ -178,8 +178,8 @@ jobs:
           export LD_LIBRARY_PATH=\$PREFIX/gcc/lib64
           export PATH=\$PREFIX/python/3.10.12/bin:\$PATH
           export LD_LIBRARY_PATH=\$PREFIX/python/3.10.12/lib:\$LD_LIBRARY_PATH
-          export PATH=\$PREFIX/ruby/3.0.7/bin:\$PATH
-          export LD_LIBRARY_PATH=\$PREFIX/ruby/3.0.7/lib:\$LD_LIBRARY_PATH
+          export PATH=\$PREFIX/ruby/3.0.2/bin:\$PATH
+          export LD_LIBRARY_PATH=\$PREFIX/ruby/3.0.2/lib:\$LD_LIBRARY_PATH
           export PATH=\$PREFIX/ariadne/$ARIADNE_VERSION/bin:\$PATH
           export PYTHONHOME=\$PREFIX/python/3.10.12
 
