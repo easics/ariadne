@@ -162,6 +162,14 @@ jobs:
           lib_file_path=$(gcc -print-file-name=libstdc++.so.6)
           cp -a ${lib_file_path}* $APPIMAGE_DIR/gcc/lib64
 
+      - name: Copy the necessary Python libs
+        shell: bash
+        run: cp -a $PACKAGE_INSTALL_DIR/python $APPIMAGE_DIR
+
+      - name: Copy the necessary Ruby libs
+        shell: bash
+        run: cp -a $PACKAGE_INSTALL_DIR/ruby $APPIMAGE_DIR
+
       - name: Create the AppRun script
         shell: bash
         run: |
