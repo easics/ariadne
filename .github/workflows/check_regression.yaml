@@ -14,7 +14,7 @@ jobs:
         with:
           submodules: true
 
-      - uses: ${{ github.workspace }}/.github/actions/setup_env/action.yaml
+      - uses: ${{ github.workspace }}/.github/actions/setup_env/
 
       - name: Configure CMake
         shell: bash
