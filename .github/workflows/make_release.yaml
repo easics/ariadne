@@ -100,8 +100,8 @@ jobs:
       - name: Set the version number for Ruby
         shell: bash
         run: |
-          echo "RUBY_VERSION=3.0.2" >> $GITHUB_ENV
-          echo "RUBY_VERSION_SHORT=3.0" >> $GITHUB_ENV
+          echo "RUBY_VERSION=2.6.10" >> $GITHUB_ENV
+          echo "RUBY_VERSION_SHORT=2.6" >> $GITHUB_ENV
 
       - name: Install the Ruby package
         shell: bash
