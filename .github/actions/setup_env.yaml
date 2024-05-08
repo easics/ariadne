@@ -1,0 +1,20 @@
+name: Setup the environment in order to use Ariadne
+
+jobs:
+  setup_env:
+    name: setup_env
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install packages for building Ariadne
+        shell: bash
+        run: sudo apt-get install -y build-essential
+                                     python3-dev
+                                     ruby-dev
+                                     flex
+                                     bison
+                                     asciidoctor
+
+      - name: Install Ruby plugins
+        shell: bash
+        run: sudo apt-get install -y ruby-asciidoctor-pdf
