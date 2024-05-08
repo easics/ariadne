@@ -1,6 +1,9 @@
 name: setup_env
 description: Setup the environment in order to use Ariadne
 
+on:
+  workflow_call:
+
 jobs:
   setup_env:
     name: setup_env
