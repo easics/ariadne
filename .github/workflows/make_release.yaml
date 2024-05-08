@@ -130,6 +130,12 @@ jobs:
         shell: bash
         run: cmake --install $PACKAGE_BUILD_DIR/ariadne
 
+      - name: Extract the Ariadne version number
+        shell: bash
+        run: |
+          ariadne_version=$(ls $PACKAGE_INSTALL_DIR/ariadne)
+          echo "ARIADNE_VERSION=$ariadne_version" >> $GITHUB_ENV
+
       - name: Set the directory for creating the AppImage
         shell: bash
         run: |
@@ -174,7 +180,7 @@ jobs:
           export LD_LIBRARY_PATH=\$PREFIX/python/3.10.12/lib:\$LD_LIBRARY_PATH
           export PATH=\$PREFIX/ruby/3.3.1/bin:\$PATH
           export LD_LIBRARY_PATH=\$PREFIX/ruby/3.3.1/lib:\$LD_LIBRARY_PATH
-          export PATH=\$PREFIX/ariadne/*/bin:\$PATH
+          export PATH=\$PREFIX/ariadne/$ARIADNE_VERSION/bin:\$PATH
           export PYTHONHOME=\$PREFIX/python/3.10.12
 
           ariadne \"\$@\"" > $APPIMAGE_DIR/AppRun
