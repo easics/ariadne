@@ -1,4 +1,5 @@
 name: Make release
+description: Make an AppImage release of Ariadne
 
 on: [push]
   #push:
@@ -149,7 +150,7 @@ jobs:
           mkdir -p $appimage_dir
           echo "APPIMAGE_DIR=$appimage_dir" >> $GITHUB_ENV
 
-      - name: Copy the necessary GCC libs
+      - name: Copy the necessary GCC libs into the AppImage
         shell: bash
         run: |
           mkdir -p $APPIMAGE_DIR/gcc/lib64
@@ -162,13 +163,17 @@ jobs:
           lib_file_path=$(gcc -print-file-name=libstdc++.so.6)
           cp -a ${lib_file_path}* $APPIMAGE_DIR/gcc/lib64
 
-      - name: Copy the necessary Python libs
+      - name: Copy the necessary Python libs into the AppImage
         shell: bash
         run: cp -a $PACKAGE_INSTALL_DIR/python $APPIMAGE_DIR
 
-      - name: Copy the necessary Ruby libs
+      - name: Copy the necessary Ruby libs into the AppImage
         shell: bash
         run: cp -a $PACKAGE_INSTALL_DIR/ruby $APPIMAGE_DIR
+
+      - name: Copy the necessary Ariadne libs into the AppImage
+        shell: bash
+        run: cp -a $PACKAGE_INSTALL_DIR/ariadne $APPIMAGE_DIR
 
       - name: Create the AppRun script
         shell: bash

@@ -1,4 +1,5 @@
-name: Setup the environment in order to use Ariadne
+name: setup_env
+description: Setup the environment in order to use Ariadne
 
 jobs:
   setup_env:
