@@ -10,7 +10,7 @@ runs:
 
     - name: Test
       shell: bash
-      run: sudo apt-cache policy bison
+      run: sudo apt-cache showpkg bison
 
     - name: Install packages for building Ariadne
       shell: bash
