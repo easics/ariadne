@@ -13,8 +13,8 @@ runs:
       run: |
         wget http://archive.ubuntu.com/ubuntu/pool/main/b/bison/libbison-dev_3.8.2+dfsg-1build1_amd64.deb
         wget http://archive.ubuntu.com/ubuntu/pool/main/b/bison/bison_3.8.2+dfsg-1build1_amd64.deb
-        dpkg -i libbison-dev_3.8.2+dfsg-1build1_amd64.deb
-        dpkg -i bison_3.8.2+dfsg-1build1_amd64.deb
+        sudo dpkg -i libbison-dev_3.8.2+dfsg-1build1_amd64.deb
+        sudo dpkg -i bison_3.8.2+dfsg-1build1_amd64.deb
 
     - name: Install packages for building Ariadne
       shell: bash
