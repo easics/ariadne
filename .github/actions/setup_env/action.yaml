@@ -8,6 +8,10 @@ runs:
       shell: bash
       run: sudo apt-get update
 
+    - name: Test
+      shell: bash
+      run: sudo apt-cache policy bison
+
     - name: Install packages for building Ariadne
       shell: bash
       run: sudo apt-get install -y build-essential
