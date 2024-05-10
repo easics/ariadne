@@ -52,7 +52,7 @@ jobs:
   build_release:
     name: build_release
     needs: ["create_release"]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v4
@@ -79,23 +79,23 @@ jobs:
         shell: bash
         run: echo "PYTHON_VERSION=3.10.12" >> $GITHUB_ENV
 
-          #- name: Install the Python package
-          #  shell: bash
-          #  run: |
-          #    cd $PACKAGE_BUILD_DIR
-          #    wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
-          #    tar -zxf Python-$PYTHON_VERSION.tgz
-          #    mkdir Python-$PYTHON_VERSION.build
-          #    cd Python-$PYTHON_VERSION.build
-          #    ../Python-$PYTHON_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION --enable-shared --enable-optimizations
-          #    make -j16
-          #    make install
+      - name: Install the Python package
+        shell: bash
+        run: |
+          cd $PACKAGE_BUILD_DIR
+          wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
+          tar -zxf Python-$PYTHON_VERSION.tgz
+          mkdir Python-$PYTHON_VERSION.build
+          cd Python-$PYTHON_VERSION.build
+          ../Python-$PYTHON_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION --enable-shared --enable-optimizations
+          make -j16
+          make install
 
-          #- name: Update the PATH variable to use the new Python from now on
-          #  shell: bash
-          #  run: |
-          #    echo "export PATH=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin:$PATH" >> $GITHUB_ENV
-          #    echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+      - name: Update the PATH variable to use the new Python from now on
+        shell: bash
+        run: |
+          echo "export PATH=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin:$PATH" >> $GITHUB_ENV
+          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Set the version number for Ruby
         shell: bash
@@ -111,8 +111,7 @@ jobs:
           tar -zxf ruby-$RUBY_VERSION.tar.gz
           mkdir ruby-$RUBY_VERSION.build
           cd ruby-$RUBY_VERSION.build
-          #CFLAGS="-Wno-deprecated-declarations"
-          CFLAGS="-O3 -ggdb3 -Wall -Wextra -Wdeclaration-after-statement -Wno-deprecated-declarations -Wduplicated-cond -Wimplicit-function-declaration -Wimplicit-int -Wmisleading-indentation -Wpointer-arith -Wrestrict -Wwrite-strings -Wimplicit-fallthrough=0 -Wmissing-noreturn -Wno-cast-function-type -Wno-constant-logical-operand -Wno-long-long -Wno-missing-field-initializers -Wno-overlength-strings -Wno-packed-bitfield-compat -Wno-parentheses-equality -Wno-self-assign -Wno-tautological-compare -Wno-unused-parameter -Wno-unused-value -Wsuggest-attribute=format -Wsuggest-attribute=noreturn -Wunused-variable -std=gnu99  -fPIC" ../ruby-$RUBY_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION --enable-shared
+          ../ruby-$RUBY_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION --enable-shared
           make -j16
           make install
 
