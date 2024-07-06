@@ -94,8 +94,8 @@ jobs:
       - name: Update the PATH variable to use the new Python from now on
         shell: bash
         run: |
-          echo "export PATH=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin:$PATH" >> $GITHUB_ENV
-          echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin" >> $GITHUB_PATH
+          echo "LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Set the version number for Ruby
         shell: bash
@@ -118,9 +118,14 @@ jobs:
       - name: Update the PATH variable to use the new Ruby from now on
         shell: bash
         run: |
-          echo "export PATH=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION/bin:$PATH" >> $GITHUB_ENV
+          echo "$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION/bin" >> $GITHUB_PATH
           echo "export LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
+      - name: Print debug info
+        shell: bash
+        run: |
           echo $PATH
+          echo $LD_LIBRARY_PATH
           ls -l $PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin/python3
 
       - name: Configure CMake for Ariadne
@@ -132,8 +137,8 @@ jobs:
                    -D SCRIPT_RUBY=ON
                    -D SCRIPT_PYTHON=ON
                    -D CMAKE_INSTALL_PREFIX=$PACKAGE_INSTALL_DIR/ariadne
-                   -DPYTHON3_EXECUTABLE=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin/python3
-                   -DPYTHON_EXECUTABLE=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin/python3
+                   -DPython3_EXECUTABLE=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin/python3
+                   -DPython_EXECUTABLE=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin/python3
                    -DPython_ROOT_DIR=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION
                    --trace-expand
 
