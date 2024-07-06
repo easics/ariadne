@@ -123,7 +123,9 @@ jobs:
 
       - name: Configure CMake for Ariadne
         shell: bash
-        run: cmake -B $PACKAGE_BUILD_DIR/ariadne
+        run: MY_RUBY_HOME=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION
+             Python_ROOT_DIR=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION
+             cmake -B $PACKAGE_BUILD_DIR/ariadne
                    -S ${{ github.workspace }}
                    -D SCRIPT_RUBY=ON
                    -D SCRIPT_PYTHON=ON
