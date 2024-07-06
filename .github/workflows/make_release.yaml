@@ -130,8 +130,9 @@ jobs:
                    -D SCRIPT_RUBY=ON
                    -D SCRIPT_PYTHON=ON
                    -D CMAKE_INSTALL_PREFIX=$PACKAGE_INSTALL_DIR/ariadne
-                   -D PYTHON3_EXECUTABLE=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin/python3
-                   -D PYTHON_EXECUTABLE=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin/python3
+                   -DPYTHON3_EXECUTABLE=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin/python3
+                   -DPYTHON_EXECUTABLE=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin/python3
+                   -DPython_ROOT_DIR=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION
 
       - name: Build Ariadne with CMake
         shell: bash
