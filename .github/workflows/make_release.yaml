@@ -100,8 +100,8 @@ jobs:
       - name: Set the version number for Ruby
         shell: bash
         run: |
-          echo "RUBY_VERSION=2.6.9" >> $GITHUB_ENV
-          echo "RUBY_VERSION_SHORT=2.6" >> $GITHUB_ENV
+          echo "RUBY_VERSION=3.2.4" >> $GITHUB_ENV
+          echo "RUBY_VERSION_SHORT=3.2" >> $GITHUB_ENV
 
       - name: Install the Ruby package
         shell: bash
@@ -111,7 +111,7 @@ jobs:
           tar -zxf ruby-$RUBY_VERSION.tar.gz
           mkdir ruby-$RUBY_VERSION.build
           cd ruby-$RUBY_VERSION.build
-          ../ruby-$RUBY_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION --enable-shared
+          ../ruby-$RUBY_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION --enable-shared --enable-load-relative
           make -j16
           make install
 
@@ -123,9 +123,7 @@ jobs:
 
       - name: Configure CMake for Ariadne
         shell: bash
-        run: MY_RUBY_HOME=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION
-             Python_ROOT_DIR=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION
-             cmake -B $PACKAGE_BUILD_DIR/ariadne
+        run: cmake -B $PACKAGE_BUILD_DIR/ariadne
                    -S ${{ github.workspace }}
                    -D SCRIPT_RUBY=ON
                    -D SCRIPT_PYTHON=ON
