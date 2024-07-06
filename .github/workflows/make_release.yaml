@@ -261,4 +261,4 @@ jobs:
         shell: bash
         run: |
           version="${{ needs.create_release.outputs.version }}"
-          gh release upload "$version" ${{ env.ASSET }} ${{ env.ASSET_SUM }}
+          gh release upload "$version" ${{ env.ASSET }} ${{ env.ASSET_SUM }} --clobber
