@@ -15,7 +15,7 @@ jobs:
   # separate from building the release so that we only create the release once.
   create_release:
     name: create_release
-      needs: ["build_and_test"]
+    needs: ["build_and_test"]
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
