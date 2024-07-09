@@ -1,23 +1,22 @@
 name: Make an AppImage release of Ariadne
 
-on: [push]
-  #push:
-  #  tags:
-  #    - "RELEASE_V[0-9]+.[0-9]+.[0-9]+"
-  # TODO set correct
+on:
+  push:
+    tags:
+      - "RELEASE_V[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
 
-  #build_and_test:
-  #  uses: ./.github/workflows/check_regression.yaml
+  build_and_test:
+    uses: ./.github/workflows/check_regression.yaml
 
   # The create-release job runs purely to initialize the GitHub release itself,
   # and names the release after the `RELEASE_Vx.y.z` tag that was pushed. It's
   # separate from building the release so that we only create the release once.
   create_release:
     name: create_release
-      #needs: ["build_and_test"]
-    runs-on: ubuntu-latest
+      needs: ["build_and_test"]
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,9 +24,7 @@ jobs:
 
       - name: Get the release version from the tag
         shell: bash
-        run: echo "RELEASE_VERSION=RELEASE_V1.1.2" >> $GITHUB_ENV
-        #run: echo "RELEASE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
-        # TODO set correct
+        run: echo "RELEASE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - name: Show the version
         shell: bash
@@ -40,10 +37,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create $RELEASE_VERSION
                                --verify-tag
-                               --draft
                                --title $RELEASE_VERSION
-                               --notes ""
-        # TODO remove the draft
+                               --notes "New release"
 
     outputs:
       version: ${{ env.RELEASE_VERSION }}
@@ -88,7 +83,7 @@ jobs:
           mkdir Python-$PYTHON_VERSION.build
           cd Python-$PYTHON_VERSION.build
           ../Python-$PYTHON_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION --enable-shared --enable-optimizations
-          make -j16
+          make -j 16
           make install
 
       - name: Update the PATH variable to use the new Python from now on
@@ -112,7 +107,7 @@ jobs:
           mkdir ruby-$RUBY_VERSION.build
           cd ruby-$RUBY_VERSION.build
           ../ruby-$RUBY_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION --enable-shared --enable-load-relative
-          make -j16
+          make -j 16
           make install
 
       - name: Update the PATH variable to use the new Ruby from now on
