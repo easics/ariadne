@@ -13,7 +13,7 @@
 # ariadne. If not, see <https://www.gnu.org/licenses/>.
 
 cmake_minimum_required(VERSION 3.16.1)
-project(ariadne LANGUAGES CXX VERSION 1.4.33)
+project(ariadne LANGUAGES CXX VERSION 1.4.34)
 
 # Auto add version to install dir
 string(APPEND CMAKE_INSTALL_PREFIX "/${CMAKE_PROJECT_VERSION}")

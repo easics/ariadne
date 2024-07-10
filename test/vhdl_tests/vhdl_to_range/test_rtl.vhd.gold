@@ -1,0 +1,51 @@
+-- EASICS generated file
+-- command : ariadne test.ari
+-- input : test.ari
+-- input : a_ent.vhd
+-- input : b_ent.vhd
+
+architecture rtl of test is
+
+  signal port_1 : std_logic_vector ( 0 to 1 );
+  signal port_top_i : std_logic_vector ( 5 to 5 );
+  component a
+    port (
+
+          clk : in std_logic;
+          reset_n : in std_logic;
+          port_1 : in std_logic_vector ( 0 to 1 );
+          port_2 : in std_logic_vector ( 4 to 7 );
+          port_3 : in std_logic_vector ( 5 to 5 )
+         );
+  end component;
+
+  component b
+    port (
+
+          clk : in std_logic;
+          reset_n : in std_logic;
+          port_1 : out std_logic_vector ( 0 to 1 );
+          port_2 : in std_logic_vector ( 4 to 7 );
+          port_3 : out std_logic_vector ( 0 downto 0 )
+         );
+  end component;
+
+
+begin
+  a_0 : a
+    port map (
+      clk => clk,
+      port_1 => port_1,
+      port_2 => port_2,
+      reset_n => reset_n,
+      port_3 => port_top_i);
+  b_0 : b
+    port map (
+      clk => clk,
+      port_1 => port_1,
+      port_2 => port_2,
+      reset_n => reset_n,
+      port_3 => port_top_i);
+  port_top <= port_top_i;
+
+end rtl;

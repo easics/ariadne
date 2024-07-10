@@ -1,0 +1,18 @@
+-- EASICS generated file
+-- command : ariadne test.ari
+-- input : test.ari
+-- input : a_ent.vhd
+-- input : b_ent.vhd
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity test is
+  port (
+
+        port_top : out std_logic_vector ( 5 to 5 );
+        clk : in std_logic;
+        reset_n : in std_logic;
+        port_2 : in std_logic_vector ( 4 to 7 )
+       );
+end test;

@@ -163,8 +163,26 @@ add_test(NAME vhdl_port_propagation
 set_property(TEST vhdl_port_propagation
              PROPERTY LABELS vhdl)
 
+add_test(NAME vhdl_port_range_propagation
+         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../runtest.sh -e ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vhdl_port_range_propagation)
+set_property(TEST vhdl_port_range_propagation
+             PROPERTY LABELS vhdl)
+
 add_test(NAME vhdl_spi
          COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../runtest.sh -e ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vhdl_spi)
 set_property(TEST vhdl_spi
+             PROPERTY LABELS vhdl)
+
+add_test(NAME vhdl_casing
+         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../runtest.sh -e ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vhdl_casing)
+set_property(TEST vhdl_casing
+             PROPERTY LABELS vhdl)
+
+add_test(NAME vhdl_to_range
+         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../runtest.sh -e ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vhdl_to_range)
+set_property(TEST vhdl_to_range
              PROPERTY LABELS vhdl)

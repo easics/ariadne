@@ -34,9 +34,13 @@ public:
   void forceDirection(const CaseAwareString & direction);
   void setType(const CaseAwareString & type);
   CaseAwareString getDirection() const;
+
   // Only for 'simple' port types
   // Throws an exception for non-simple port types
+  CaseAwareString getLeftRange() const;
+  CaseAwareString getRightRange() const;
   CaseAwareString getWidthMin1() const;
+
   bool isPort() const;
   bool isSignalPort() const;
   void renameType(const CaseAwareString & oldName,

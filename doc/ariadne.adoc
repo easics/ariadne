@@ -458,9 +458,18 @@ The class SignalPort (returned by getPorts and getSignals) has following methods
     Set the VHDL type of the signal or port
   * getDirection +
     Get the direction of a port. Returns a string
+  * getLeftRange +
+    Get the left range of a port. Returns a string. Only works for
+    std_logic_vector, unsigned and signed types in VHDL
+  * getRightRange +
+    Get the left range of a port. Returns a string. Only works for
+    std_logic_vector, unsigned and signed types in VHDL
   * getWidthMin1 +
-    Get the width of a port minus 1. Returns a string.  Only works for
-    std_logic, std_logic_vector, unsigned and signed types.
+    Get the width of a port minus 1. Returns a string. Only works for std_logic,
+    std_logic_vector, unsigned and signed types in VHDL. We return a string that
+    contains the higher range value minus the lower one. If the lower value is 0
+    this is simplified to just returning the higher range value. Note that we
+    do not evaluate the expression of the ranges any further
   * isPort +
     Return true if it is a port, false if it is a signal
   * renameType(oldname:string, newname:string) +

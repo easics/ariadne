@@ -313,4 +313,14 @@ R"(
 - Replace defines in text
 - Fix for spaces in preprocessor macros
 
+1.4.34
+======
+- The getWidthMin1 function for the SignalPort class now takes into account the
+  case insensitivity of VHDL when trying to find the width. It also supports the
+  "to" keyword as a range instead of only "downto"
+- In the Verilog output generation we now allow to keep the ranges of the
+  propagated types. This was already the case in VHDL but not yet in Verilog.
+  Previously the range would always be forced to end at 0
+- Added Github Actions scritps to automatically make an AppImage
+
 )"

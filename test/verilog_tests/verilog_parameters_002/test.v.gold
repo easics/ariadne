@@ -7,9 +7,9 @@
 module test
   (
    input clk,
-   input [g_w1-1:0] d1,
-   input [g_w2+1:0] d2,
-   input [g_w3*2-1:0] d3
+   input [ g_w1 - 1:0] d1,
+   input [ g_w2 + 1:0] d2,
+   input [ g_w3 * 2 - 1:0] d3
   );
 
 

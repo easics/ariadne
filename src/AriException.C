@@ -181,9 +181,15 @@ void AriException::translate(E_AriExceptionType eType,
     {
       message_ = "When checking entity file " + arg1 + "\n" + arg2;
     }
-  else if (eType == EX_VERILOG_UNSUPPORTED_TYPE)
+  else if (eType == EX_WIDTH_COULD_NOT_BE_CALCULATED)
     {
-      message_ = "Unsupported type for verilog generation :\n"
+      message_ = "The width could not be calculated for :\n"
+        "Signal/Port name : " + arg2 + "\n"
+        "Type name        : " + arg1;
+    }
+  else if (eType == EX_PORT_HAS_NO_RANGE)
+    {
+      message_ = "The range could not be extracted for :\n"
         "Signal/Port name : " + arg2 + "\n"
         "Type name        : " + arg1;
     }

@@ -16,6 +16,7 @@
 #include "SignalPort.h"
 #include "AriException.h"
 #include "StringUtil.h"
+#include <iostream>
 
 SignalPort::SignalPort(const CaseAwareString & name,
                        const CaseAwareString & type,
@@ -86,13 +87,11 @@ CaseAwareString SignalPort::getDirection() const
   return direction_;
 }
 
-CaseAwareString SignalPort::getWidthMin1() const
+CaseAwareString SignalPort::getLeftRange() const
 {
+  // The following are checks for VHDL so we compare them case insensitive
   CaseAwareString type = getType().strip();
-  if (type == "std_logic")
-    return CaseAwareString(type.caseSensitive(), "0");
-  if (type == "real")
-    return CaseAwareString(type.caseSensitive(), "0");
+  type.setCaseSensitive(false);
   CaseAwareString vhdlType;
   if (type.substr(0, 16) == "std_logic_vector")
     vhdlType = CaseAwareString(type.caseSensitive(), "std_logic_vector");
@@ -106,19 +105,202 @@ CaseAwareString SignalPort::getWidthMin1() const
       CaseAwareString range = type.substr(vhdlType.size());
       replace("(", "", range, 1);
       rreplace(')', "", range, 1);
-      replace(" downto ", "|", range);
-      range = range.removeSpaces();
-      std::string::size_type barPos = range.find('|');
-      if ((barPos == std::string::npos) ||
-          (range.size() != barPos+2) ||
-          (range[barPos+1] != '0'))
+
+      // Find the range token
+      std::string::size_type rangePos = std::string::npos;
+      std::uint32_t scopeDepth = 0;
+      for (std::string::size_type i = 0; i < range.size(); ++i)
         {
-          throw AriException(EX_VERILOG_UNSUPPORTED_TYPE, type.str(),
+          if (range[i] == '(')
+            {
+              ++scopeDepth;
+            }
+          if (range[i] == ')')
+            {
+              --scopeDepth;
+            }
+
+          if (scopeDepth == 0)
+            {
+              if (range.substr(i, 8) == " downto ")
+                {
+                  rangePos = i;
+                  break;
+                }
+              if (range.substr(i, 4) == " to ")
+                {
+                  rangePos = i;
+                  break;
+                }
+            }
+        }
+
+      if ((rangePos == std::string::npos))
+        {
+          throw AriException(EX_PORT_HAS_NO_RANGE, type.str(),
                              getName().str());
         }
-      return range.substr(0, barPos);
+
+      CaseAwareString leftRange = range.substr(0, rangePos);
+      return leftRange;
     }
-  throw AriException(EX_VERILOG_UNSUPPORTED_TYPE, type.str(), getName().str());
+  throw AriException(EX_PORT_HAS_NO_RANGE, type.str(), getName().str());
+}
+
+CaseAwareString SignalPort::getRightRange() const
+{
+  // The following are checks for VHDL so we compare them case insensitive
+  CaseAwareString type = getType().strip();
+  type.setCaseSensitive(false);
+  CaseAwareString vhdlType;
+  if (type.substr(0, 16) == "std_logic_vector")
+    vhdlType = CaseAwareString(type.caseSensitive(), "std_logic_vector");
+  else if (type.substr(0, 8) == "unsigned")
+    vhdlType = CaseAwareString(type.caseSensitive(), "unsigned");
+  else if (type.substr(0, 6) == "signed")
+    vhdlType = CaseAwareString(type.caseSensitive(), "signed");
+  if (!vhdlType.empty())
+    {
+      using namespace StringUtil;
+      CaseAwareString range = type.substr(vhdlType.size());
+      replace("(", "", range, 1);
+      rreplace(')', "", range, 1);
+
+      // Find the range token
+      std::string::size_type rangePos = std::string::npos;
+      bool downtoNotTo = true;
+      std::uint32_t scopeDepth = 0;
+      for (std::string::size_type i = 0; i < range.size(); ++i)
+        {
+          if (range[i] == '(')
+            {
+              ++scopeDepth;
+            }
+          if (range[i] == ')')
+            {
+              --scopeDepth;
+            }
+
+          if (scopeDepth == 0)
+            {
+              if (range.substr(i, 8) == " downto ")
+                {
+                  rangePos = i;
+                  break;
+                }
+              if (range.substr(i, 4) == " to ")
+                {
+                  rangePos = i;
+                  downtoNotTo = false;
+                  break;
+                }
+            }
+        }
+
+      if ((rangePos == std::string::npos))
+        {
+          throw AriException(EX_PORT_HAS_NO_RANGE, type.str(),
+                             getName().str());
+        }
+
+      CaseAwareString rightRange;
+      if (downtoNotTo)
+        {
+          rightRange = range.substr(rangePos + 8);
+        }
+      else
+        {
+          rightRange = range.substr(rangePos + 4);
+        }
+
+      return rightRange;
+    }
+  throw AriException(EX_PORT_HAS_NO_RANGE, type.str(), getName().str());
+}
+
+CaseAwareString SignalPort::getWidthMin1() const
+{
+  CaseAwareString type = getType().strip();
+  if (type == "real")
+    return CaseAwareString(type.caseSensitive(), "0");
+
+  // The following are checks for VHDL so we compare them case insensitive
+  type.setCaseSensitive(false);
+  if (type == "std_logic")
+    return CaseAwareString(type.caseSensitive(), "0");
+
+  CaseAwareString vhdlType;
+  if (type.substr(0, 16) == "std_logic_vector")
+    vhdlType = CaseAwareString(type.caseSensitive(), "std_logic_vector");
+  else if (type.substr(0, 8) == "unsigned")
+    vhdlType = CaseAwareString(type.caseSensitive(), "unsigned");
+  else if (type.substr(0, 6) == "signed")
+    vhdlType = CaseAwareString(type.caseSensitive(), "signed");
+  if (!vhdlType.empty())
+    {
+      using namespace StringUtil;
+      CaseAwareString range = type.substr(vhdlType.size());
+      replace("(", "", range, 1);
+      rreplace(')', "", range, 1);
+
+      // Find the range token
+      std::string::size_type rangePos = std::string::npos;
+      bool downtoNotTo = true;
+      std::uint32_t scopeDepth = 0;
+      for (std::string::size_type i = 0; i < range.size(); ++i)
+        {
+          if (range[i] == '(')
+            {
+              ++scopeDepth;
+            }
+          if (range[i] == ')')
+            {
+              --scopeDepth;
+            }
+
+          if (scopeDepth == 0)
+            {
+              if (range.substr(i, 8) == " downto ")
+                {
+                  rangePos = i;
+                  break;
+                }
+              if (range.substr(i, 4) == " to ")
+                {
+                  rangePos = i;
+                  downtoNotTo = false;
+                  break;
+                }
+            }
+        }
+
+      if ((rangePos == std::string::npos))
+        {
+          throw AriException(EX_WIDTH_COULD_NOT_BE_CALCULATED, type.str(),
+                             getName().str());
+        }
+
+      CaseAwareString highRange = range.substr(0, rangePos);
+      CaseAwareString lowRange;
+      if (downtoNotTo)
+        {
+          lowRange = range.substr(rangePos + 8);
+        }
+      else
+        {
+          lowRange = range.substr(rangePos + 4);
+          std::swap(highRange, lowRange);
+        }
+
+      // Some cleanup of the output
+      if (lowRange.removeSpaces() == "0")
+        {
+          return highRange;
+        }
+
+      return "(" + highRange + ") - (" + lowRange + ")";
+    }
+  throw AriException(EX_WIDTH_COULD_NOT_BE_CALCULATED, type.str(), getName().str());
 }
 
 bool SignalPort::isPort() const

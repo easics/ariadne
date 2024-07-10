@@ -138,3 +138,15 @@ add_test(NAME verilog_slice
          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/verilog_slice)
 set_property(TEST verilog_slice
              PROPERTY LABELS verilog)
+
+add_test(NAME verilog_port_range_propagation
+         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../runtest.sh -e ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/verilog_port_range_propagation)
+set_property(TEST verilog_port_range_propagation
+             PROPERTY LABELS verilog)
+
+add_test(NAME verilog_to_range
+         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../runtest.sh -e ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/verilog_to_range)
+set_property(TEST verilog_to_range
+             PROPERTY LABELS verilog)

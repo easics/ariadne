@@ -2398,7 +2398,12 @@ void ModuleInstance::generateVerilog(const StringUtil::stringlist & argv,
               if (width == "0")
                 portString += portName;
               else
-                portString += "[" + width + ":0] " + portName;
+                {
+                  CaseAwareString leftRange = port->getLeftRange();
+                  CaseAwareString rightRange = port->getRightRange();
+                  portString += "[" + leftRange + ":" + rightRange + "] " +
+                                portName;
+                }
               module << portString;
 
               bool isLastPort = portNum == numPorts;
@@ -2435,7 +2440,12 @@ void ModuleInstance::generateVerilog(const StringUtil::stringlist & argv,
           if (width == "0")
             module << sigName <<";\n";
           else
-            module << "[" << width << ":0] " << sigName <<";\n";
+            {
+              CaseAwareString leftRange = (*sig)->getLeftRange();
+              CaseAwareString rightRange = (*sig)->getRightRange();
+              module << "[" << leftRange << ":" << rightRange << "] " <<
+                        sigName <<";\n";
+            }
         }
     }
   module << "\n";

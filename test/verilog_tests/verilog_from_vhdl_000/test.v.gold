@@ -9,7 +9,7 @@ module test
   (
    input clk,
    input reset_n,
-   input [31:0] counter
+   input [  31:0 ] counter
   );
 
 

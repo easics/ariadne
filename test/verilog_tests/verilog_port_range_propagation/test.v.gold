@@ -1,0 +1,38 @@
+// EASICS generated file
+// command : ariadne test.ari
+// tool_version : 1.4.13
+// input : test.ari
+// input : a.v
+// input : b.v
+
+module test
+  (
+   output [9:2] vector1,
+   input clk,
+   input [1:1] vector0,
+   input [20:5] vector2,
+   input klc
+  );
+
+
+wire [9:2] vector1_i;
+
+
+  a a_1
+    (
+     .clk(clk),
+     .vector0(vector0),
+     .vector2(vector2),
+     .vector1(vector1_i)
+    );
+  b b_1
+    (
+     .clk(clk),
+     .klc(klc),
+     .vector2(vector2),
+     .vector1(vector1_i)
+    );
+  assign vector1 = vector1_i;
+
+
+endmodule

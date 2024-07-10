@@ -236,8 +236,21 @@ unsigned int CaseAwareString::replace(const std::string & what,
                                       const std::string & by,
                                       int maxReplace)
 {
+  if (caseSensitive_)
+    return StringUtil::replace(what, by, s_, maxReplace);
+
   unsigned int replaceResult = 0;
-  replaceResult = StringUtil::replace(what, by, s_, maxReplace);
+  std::string sLower = StringUtil::toLower(s_);
+  std::string whatLower = StringUtil::toLower(what);
+  std::string::size_type token = sLower.find(whatLower);
+  while (token != std::string::npos)
+    {
+      s_.replace(token, what.size(), by);
+      token = s_.find(whatLower, token + by.size());
+      ++replaceResult;
+      if ((maxReplace > -1) && (replaceResult >= maxReplace))
+        break;
+    }
   return replaceResult;
 }
 
