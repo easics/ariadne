@@ -50,9 +50,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create $RELEASE_VERSION
-                               --verify-tag
                                --notes "New release"
                                --draft
+                               #--verify-tag
                                #--title $RELEASE_VERSION
 
     outputs:
