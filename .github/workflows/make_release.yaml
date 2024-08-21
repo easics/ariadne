@@ -129,7 +129,7 @@ jobs:
           cd ruby-$RUBY_VERSION.build
           #export CFLAGS="$CFLAGS -include ${{ github.workspace }}/glibc_version_header/version_headers/x64/force_link_glibc_2.27.h"
           #export CXXFLAGS="$CXXFLAGS -include ${{ github.workspace }}/glibc_version_header/version_headers/x64/force_link_glibc_2.27.h"
-          ../ruby-$RUBY_VERSION/configure optflags="-include ${{ github.workspace }}/glibc_version_header/version_headers/x64/force_link_glibc_2.27.h" \
+          ../ruby-$RUBY_VERSION/configure optflags="-O3 -fno-fast-math -include ${{ github.workspace }}/glibc_version_header/version_headers/x64/force_link_glibc_2.27.h" \
                                           --prefix=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION \
                                           --enable-shared \
                                           --enable-load-relative
