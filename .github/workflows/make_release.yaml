@@ -128,10 +128,11 @@ jobs:
           mkdir ruby-$RUBY_VERSION.build
           cd ruby-$RUBY_VERSION.build
           echo $CFLAGS
+          echo "PACKAGE_INSTALL_DIR=$package_install_dir" >> $GITHUB_ENV
           #export CFLAGS="$CFLAGS -include ${{ github.workspace }}/glibc_version_header/version_headers/x64/force_link_glibc_2.27.h"
           #export CXXFLAGS="$CXXFLAGS -include ${{ github.workspace }}/glibc_version_header/version_headers/x64/force_link_glibc_2.27.h"
           echo $CFLAGS
-          ../ruby-$RUBY_VERSION/configure CFLAGS="-include ${{ github.workspace }}/glibc_version_header/version_headers/x64/force_link_glibc_2.27.h" \
+          ../ruby-$RUBY_VERSION/configure CFLAGS="$CFLAGS -include ${{ github.workspace }}/glibc_version_header/version_headers/x64/force_link_glibc_2.27.h" \
                                           --prefix=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION \
                                           --enable-shared \
                                           --enable-load-relative
