@@ -72,10 +72,9 @@ jobs:
       - uses: ./.github/actions/setup_env/
 
       - name: Checkout the glibc_version_header repository
-        shell: bash
-        run: |
-          git clone git@github.com:wheybags/glibc_version_header.git
-          echo "GLIBC_VERSION_HEADER=./glibc_version_header" >> $GITHUB_ENV
+        uses: actions/checkout@v4
+        with:
+          repository: wheybags/glibc_version_header
 
       - name: Set the build directory for the packages
         shell: bash
@@ -91,27 +90,27 @@ jobs:
           mkdir -p $package_install_dir
           echo "PACKAGE_INSTALL_DIR=$package_install_dir" >> $GITHUB_ENV
 
-      - name: Set the version number for Python
-        shell: bash
-        run: echo "PYTHON_VERSION=3.10.12" >> $GITHUB_ENV
+      #- name: Set the version number for Python
+      #  shell: bash
+      #  run: echo "PYTHON_VERSION=3.10.12" >> $GITHUB_ENV
 
-      - name: Install the Python package
-        shell: bash
-        run: |
-          cd $PACKAGE_BUILD_DIR
-          wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
-          tar -zxf Python-$PYTHON_VERSION.tgz
-          mkdir Python-$PYTHON_VERSION.build
-          cd Python-$PYTHON_VERSION.build
-          ../Python-$PYTHON_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION --enable-shared --enable-optimizations
-          make -j 16
-          make install
+      #- name: Install the Python package
+      #  shell: bash
+      #  run: |
+      #    cd $PACKAGE_BUILD_DIR
+      #    wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
+      #    tar -zxf Python-$PYTHON_VERSION.tgz
+      #    mkdir Python-$PYTHON_VERSION.build
+      #    cd Python-$PYTHON_VERSION.build
+      #    ../Python-$PYTHON_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION --enable-shared --enable-optimizations
+      #    make -j 16
+      #    make install
 
-      - name: Update the PATH variable to use the new Python from now on
-        shell: bash
-        run: |
-          echo "$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin" >> $GITHUB_PATH
-          echo "LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+      #- name: Update the PATH variable to use the new Python from now on
+      #  shell: bash
+      #  run: |
+      #    echo "$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/bin" >> $GITHUB_PATH
+      #    echo "LD_LIBRARY_PATH=$PACKAGE_INSTALL_DIR/python/$PYTHON_VERSION/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Set the version number for Ruby
         shell: bash
@@ -127,8 +126,8 @@ jobs:
           tar -zxf ruby-$RUBY_VERSION.tar.gz
           mkdir ruby-$RUBY_VERSION.build
           cd ruby-$RUBY_VERSION.build
-          export CFLAGS="$CFLAGS -include $GLIBC_VERSION_HEADER/version_headers/x64/force_link_glibc_2.27.h"
-          export CXXFLAGS="$CXXFLAGS -include $GLIBC_VERSION_HEADER/version_headers/x64/force_link_glibc_2.27.h"
+          export CFLAGS="$CFLAGS -include ${{ github.workspace }}/glibc_version_header/version_headers/x64/force_link_glibc_2.27.h"
+          export CXXFLAGS="$CXXFLAGS -include ${{ github.workspace }}/glibc_version_header/version_headers/x64/force_link_glibc_2.27.h"
           ../ruby-$RUBY_VERSION/configure --prefix=$PACKAGE_INSTALL_DIR/ruby/$RUBY_VERSION \
                                           --enable-shared \
                                           --enable-load-relative
